@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-ticket-management-config
+data:
+  #Inject standard production flags
+  ASPNETCORE_ENVIRONMENT: "Production"
+  NODE_ENV: "production"
+  #Service-specific environment variables will be added here

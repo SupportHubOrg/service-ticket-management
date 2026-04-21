@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-ticket-management
+  labels:
+    app: service-ticket-management
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: service-ticket-management
+  template:
+    metadata:
+      labels:
+        app: service-ticket-management
+    spec:
+      containers:
+      - name: service-ticket-management
+        #Replace with actual container registry URL
+        image: your-registry.com/issueresolutionorg/service-ticket-management:latest
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - configMapRef:
+            name: service-ticket-management-config
