@@ -13,8 +13,8 @@ namespace SupportHub.TicketManagement.Features.Tickets.UpdateTicket;
 /// <param name="TargetStatus">Status to update the ticket to. Must be a valid enum value.</param>
 /// <param name="TargetOperatorId">ID of the operator to assign the ticket to. Optional; if null, the ticket will be unassigned.</param>
 public record UpdateTicketCommand(
-    Guid TicketId,
     Guid UserId,
+    Guid TicketId,
     Status TargetStatus,
     Guid? TargetOperatorId
 ) : IRequest<bool>;

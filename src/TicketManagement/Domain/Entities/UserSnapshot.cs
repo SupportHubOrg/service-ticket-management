@@ -20,5 +20,6 @@ namespace SupportHub.TicketManagement.Domain.Entities
         public ICollection<TicketAuditLog> TicketAuditLogs { get; set; } = [];
         public ICollection<Ticket> CreatedTickets { get; set; } = [];
         public ICollection<Ticket> AssignedTickets { get; set; } = [];
+        public ICollection<TicketTag> AssignedTicketTags { get; set; } = [];
     }
 }

@@ -66,13 +66,7 @@ public class GetTicketsHandler(TicketDbContext db) : IRequestHandler<GetTicketsQ
             query = query.Where(t => t.CreatedAt <= request.CreatedBefore.Value);
 
         //Apply Sorting
-        query = request.SortBy?.ToLower() switch
-        {
-            "updatedat" => request.SortDescending ? query.OrderByDescending(t => t.UpdatedAt) : query.OrderBy(t => t.UpdatedAt),
-            "status" => request.SortDescending ? query.OrderByDescending(t => t.Status) : query.OrderBy(t => t.Status),
-            //Default sort by CreatedAt
-            _ => request.SortDescending ? query.OrderByDescending(t => t.CreatedAt) : query.OrderBy(t => t.CreatedAt)
-        };
+        query = query.ApplySort(request.SortBy, request.SortDescending);
 
         //Apply Pagination
         int totalCount = await query.CountAsync(cancellationToken);

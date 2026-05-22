@@ -40,7 +40,7 @@ public class GetTicketHandler(TicketDbContext db) : IRequestHandler<GetTicketQue
         {
             //Check if the user belongs to the same organization as the ticket creator. If not, return 403 Forbidden.
             if (!isSameOrganization)
-                throw new AppException(StatusCodes.Status403Forbidden, "You do not have permission to view tickets outside your organization.");
+                throw new AppException(StatusCodes.Status403Forbidden, "You do not have permission to view this ticket.");
 
             //Apply role-based visibility rules within the organization
             bool canView = user.Role switch
@@ -56,7 +56,7 @@ public class GetTicketHandler(TicketDbContext db) : IRequestHandler<GetTicketQue
             //If the user doesn't have permission to view this ticket, return 403 Forbidden
             if (!canView)
             {
-                throw new AppException(StatusCodes.Status403Forbidden, "You do not have permission to view this specific ticket.");
+                throw new AppException(StatusCodes.Status403Forbidden, "You do not have permission to view this ticket.");
             }
         }
 

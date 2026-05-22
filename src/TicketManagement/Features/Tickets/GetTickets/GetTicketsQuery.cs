@@ -2,6 +2,7 @@ using FluentValidation;
 using MediatR;
 using SupportHub.TicketManagement.Domain.Entities;
 using SupportHub.TicketManagement.Domain.Enums;
+using SupportHub.TicketManagement.Infrastructure.Data;
 
 namespace SupportHub.TicketManagement.Features.Tickets.GetTickets;
 
@@ -34,35 +35,12 @@ public record TicketSummaryResponse(
     DateTime UpdatedAt
 );
 
-/// <summary>
-/// Standardized wrapper for paginated responses.
-/// </summary>
-public record PagedResult<T>(
-    List<T> Items,
-    int TotalCount,
-    int PageNumber,
-    int PageSize
-);
-
-public class GetTicketsValidator : AbstractValidator<GetTicketsQuery>
+public class GetTicketsValidator : PagedQueryValidatorBase<GetTicketsQuery, Ticket>
 {
-    public GetTicketsValidator()
+    public GetTicketsValidator() : base(x => x.PageNumber, x => x.PageSize, x => x.SortBy)
     {
-        RuleFor(x => x.UserId)
-            .NotEmpty().WithMessage("User ID is required.");
-
-        RuleFor(x => x.PageNumber)
-            .GreaterThanOrEqualTo(1).WithMessage("Page number must be at least 1.");
-
-        RuleFor(x => x.PageSize)
-            .InclusiveBetween(1, 100).WithMessage("Page size must be between 1 and 100.");
-            
         RuleFor(x => x)
             .Must(x => !x.CreatedAfter.HasValue || !x.CreatedBefore.HasValue || x.CreatedAfter <= x.CreatedBefore)
             .WithMessage("CreatedAfter date cannot be later than CreatedBefore date.");
-
-        RuleFor(x => x.SortBy)
-            .Must(sortBy => string.IsNullOrEmpty(sortBy) || typeof(Ticket).GetProperty(sortBy) != null)
-            .WithMessage("SortBy must be a valid property name of Ticket.");
     }
 }

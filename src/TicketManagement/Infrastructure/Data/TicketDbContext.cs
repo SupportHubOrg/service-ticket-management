@@ -9,7 +9,7 @@ namespace SupportHub.TicketManagement.Infrastructure.Data
 
         //Core Entities
         public DbSet<Ticket> Tickets => Set<Ticket>();
-        public DbSet<Tag> TagSnapshots => Set<Tag>();
+        public DbSet<Tag> Tags => Set<Tag>();
         public DbSet<TicketTag> TicketTags => Set<TicketTag>();
         public DbSet<OperatorTag> OperatorTags => Set<OperatorTag>();
         public DbSet<TicketMessage> TicketMessages => Set<TicketMessage>();

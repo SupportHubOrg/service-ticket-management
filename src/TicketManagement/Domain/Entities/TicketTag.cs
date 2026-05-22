@@ -12,10 +12,10 @@ namespace SupportHub.TicketManagement.Domain.Entities
         public Guid TagId { get; set; } = default!;
         
         [Required]
-        [EnumDataType(typeof(Role))]
-        public Role AssignedBy { get; set; } = default!;
+        public Guid AssignedById { get; set; } = default!;
 
         public Ticket Ticket { get; set; } = null!;
         public Tag Tag { get; set; } = null!;
+        public UserSnapshot AssignedBy { get; set; } = null!;
     }
 }

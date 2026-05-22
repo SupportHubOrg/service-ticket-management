@@ -27,7 +27,6 @@ public class CreateTicketHandler(TicketDbContext db, IEventPublisher publisher, 
         UserSnapshot? user = await _db.UserSnapshots
             .Include(u => u.Organization)
             .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
-
         //Check if user exists and return 401 Unauthorized if not
         if (user == null)
             throw new AppException(StatusCodes.Status401Unauthorized, "User could not be found.");
@@ -54,7 +53,7 @@ public class CreateTicketHandler(TicketDbContext db, IEventPublisher publisher, 
         _db.Tickets.Add(ticket);
 
         //Log the ticket creation
-        TicketAuditLog ticketAuditLog = new TicketAuditLog
+        TicketAuditLog ticketAuditLog = new()
         {
             Id = Guid.NewGuid(),
             TicketId = ticket.Id,
