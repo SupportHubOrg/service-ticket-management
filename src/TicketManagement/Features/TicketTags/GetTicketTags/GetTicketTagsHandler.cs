@@ -13,11 +13,10 @@ public class GetTicketTagsHandler(TicketDbContext db) : IRequestHandler<GetTicke
 
     public async Task<PagedResult<TicketTagSummaryResponse>> Handle(GetTicketTagsQuery request, CancellationToken cancellationToken)
     {
-        //Retrieve the requesting user to enforce authorization rules
+        //Retrieve the requesting user and check if they exist, if not return 401 Unauthorized
         var requestingUser = await _db.UserSnapshots
             .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
-        //Check if the user exists and return 401 Unauthorized if not
         if (requestingUser == null)
             throw new AppException(StatusCodes.Status401Unauthorized, "User could not be found.");
 
@@ -25,7 +24,8 @@ public class GetTicketTagsHandler(TicketDbContext db) : IRequestHandler<GetTicke
         var query = _db.TicketTags.Include(tt => tt.Ticket).ThenInclude(t => t.Creator).AsNoTracking().AsQueryable();
 
         //Enforce Data Visibility Rules
-        if (requestingUser.Role != Role.SUPPORT_HUB_ADMINISTRATOR && requestingUser.Role != Role.SYSTEM)
+        bool isSystemAdmin = requestingUser.Role == Role.SUPPORT_HUB_ADMINISTRATOR || requestingUser.Role == Role.SYSTEM;
+        if (!isSystemAdmin)
         {
             //Lock all non-system admins to their own organization
             query = query.Where(tt => tt.Ticket.Creator.OrganizationId == requestingUser.OrganizationId);
@@ -49,21 +49,19 @@ public class GetTicketTagsHandler(TicketDbContext db) : IRequestHandler<GetTicke
         //Apply User-Requested Filters
         if (request.TagId.HasValue)
             query = query.Where(t => t.TagId == request.TagId.Value);
-
         if (request.AssignedById.HasValue)
             query = query.Where(t => t.AssignedById == request.AssignedById.Value);
-
         if (request.TicketId.HasValue)
             query = query.Where(t => t.TicketId == request.TicketId.Value);
 
         //Apply Sorting
         query = query.ApplySort(request.SortBy, request.SortDescending);
 
-        //Apply Pagination
+        //Count total items before pagination
         int totalCount = await query.CountAsync(cancellationToken);
 
-        //Get the paginated list of tickets and project to TicketTagSummaryResponse
-        var tickets = await query
+        //Get the paginated list of ticket tags and project to TicketTagSummaryResponse
+        var ticketTags = await query
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
             .Include(tt => tt.Tag)
@@ -80,7 +78,7 @@ public class GetTicketTagsHandler(TicketDbContext db) : IRequestHandler<GetTicke
 
         //Return the paginated list of ticket summaries along with pagination metadata
         return new PagedResult<TicketTagSummaryResponse>(
-            tickets,
+            ticketTags,
             totalCount,
             request.PageNumber,
             request.PageSize

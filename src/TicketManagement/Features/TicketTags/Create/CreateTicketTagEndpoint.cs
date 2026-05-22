@@ -11,9 +11,9 @@ public static class CreateTicketTagEndpoint
     /// <param name="app"></param>
     public static void MapCreateTicketTagEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/tickets/{ticketId}/tags", async (
+        app.MapPost("/api/tickets/{ticketId}/tags/{tagId}", async (
             Guid ticketId,
-            CreateTicketTagRequest request,
+            Guid tagId,
             HttpContext httpContext,
             ClaimsPrincipal user,
             IMediator mediator) =>
@@ -24,7 +24,7 @@ public static class CreateTicketTagEndpoint
                 return Results.Unauthorized();
 
             //Create and send the command
-            var command = new CreateTicketTagCommand(userId, ticketId, request.TagId);
+            var command = new CreateTicketTagCommand(userId, ticketId, tagId);
             await mediator.Send(command);
 
             //Return success response
@@ -32,5 +32,3 @@ public static class CreateTicketTagEndpoint
         }).RequireAuthorization();
     }
 }
-
-public record CreateTicketTagRequest(Guid TagId);

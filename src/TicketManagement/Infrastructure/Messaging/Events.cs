@@ -13,6 +13,8 @@ public record TicketTagUpdatedEvent(Guid TicketId, Guid OrganizationId, Guid Upd
 public record TicketEscalatedEvent(Guid TicketId, Guid OrganizationId, Guid EscalatedById, Status TargetLevel);
 public record SlaDeadlineApprachingEvent(Guid TicketId, Guid OrganizationId, SlaType SlaType, DateTime DeadlineTime, float MinutesRemaining);
 public record SlaDeadlineBreachedEvent(Guid TicketId, Guid OrganizationId, SlaType SlaType, DateTime DeadlineTime);
+public record OperatorTagAddedEvent(Guid OperatorId, Guid TagId, Guid AddedById, string TagName);
+public record OperatorTagRemovedEvent(Guid OperatorId, Guid TagId, Guid RemovedById, string TagName);
 
 //Incoming events consumed from AI Triage Service
 public record TagSuggestionPayload(Guid TagId, string Name);
