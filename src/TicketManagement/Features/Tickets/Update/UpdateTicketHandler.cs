@@ -9,11 +9,6 @@ using SupportHub.TicketManagement.Infrastructure.Data;
 
 namespace SupportHub.TicketManagement.Features.Tickets.UpdateTicket;
 
-/// <summary>
-/// Handles updating a ticket's status and/or assigned operator.
-/// </summary>
-/// <param name="db"></param>
-/// <param name="publisher"></param>
 public class UpdateTicketHandler(TicketDbContext db, IEventPublisher publisher) : IRequestHandler<UpdateTicketCommand, bool>
 {
     private readonly TicketDbContext _db = db;
@@ -21,27 +16,45 @@ public class UpdateTicketHandler(TicketDbContext db, IEventPublisher publisher) 
 
     public async Task<bool> Handle(UpdateTicketCommand request, CancellationToken cancellationToken)
     {
-        //Retrieve the ticket to be updated
+        //Retrieve the ticket to be updated and check if it exists, otherwise return 404 Not Found
         Ticket? ticket = await _db.Tickets
             .Include(t => t.AssignedOperator)
             .Include(t => t.Creator)
             .FirstOrDefaultAsync(t => t.Id == request.TicketId, cancellationToken);
-        
-        //If the ticket doesn't exist, return 404 Not Found
         if (ticket == null)
             throw new AppException(StatusCodes.Status404NotFound, $"Ticket {request.TicketId} could not be found.");
 
-        //Ensure the user has permission to update the ticket
+        //Check if the user exists and return 401 Unauthorized if not
         var user = await _db.UserSnapshots.Where(u => u.Id == request.UserId)
             .FirstOrDefaultAsync(cancellationToken);
-        if (user == null || user.OrganizationId != ticket.Creator.OrganizationId)
-            throw new AppException(StatusCodes.Status401Unauthorized, "User does not have access to this ticket.");
-        if (user.Role != Role.ORGANIZATION_MANAGER && user.Role != Role.SUPPORT_HUB_ADMINISTRATOR && user.Role != Role.SYSTEM && user.Id != ticket.AssignedOperatorId)
+        if (user == null)
+            throw new AppException(StatusCodes.Status401Unauthorized, "User could not be found.");
+
+        //Enforce strict authorization rules
+        bool isSystemAdmin = user.Role == Role.SUPPORT_HUB_ADMINISTRATOR || user.Role == Role.SYSTEM;
+        bool isOrganizationManager = user.Role == Role.ORGANIZATION_MANAGER && user.OrganizationId == ticket.Creator.OrganizationId;
+        bool isAssignedOperator = ticket.AssignedOperatorId.HasValue && ticket.AssignedOperatorId.Value == request.UserId;
+        if (!isSystemAdmin && !isOrganizationManager && !isAssignedOperator)
             throw new AppException(StatusCodes.Status403Forbidden, "User does not have permission to update this ticket.");
 
         //Determine what actually changed to conditionally publish events
         bool statusChanged = ticket.Status != request.TargetStatus;
         bool operatorChanged = request.TargetOperatorId.HasValue && ticket.AssignedOperatorId != request.TargetOperatorId;
+
+        //If operator is being changed, verify the new operator exists, has the correct role and belongs to the correct organization, otherwise return 400 Bad Request
+        if (operatorChanged)
+        {
+#pragma warning disable CS8629 //Already checked that TargetOperatorId has value with the operatorChanged condition
+            var newOperator = await _db.UserSnapshots.Where(u => u.Id == request.TargetOperatorId.Value)
+                .FirstOrDefaultAsync(cancellationToken);
+#pragma warning restore CS8629
+            if (newOperator == null)
+                throw new AppException(StatusCodes.Status400BadRequest, "Target operator could not be found.");
+            if (newOperator.Role != Role.LEVEL_1_OPERATOR && newOperator.Role != Role.LEVEL_2_OPERATOR)
+                throw new AppException(StatusCodes.Status400BadRequest, "Target operator must have SUPPORT_HUB_OPERATOR role.");
+            if (newOperator.OrganizationId != ticket.Creator.OrganizationId)
+                throw new AppException(StatusCodes.Status400BadRequest, "Target operator must belong to the same organization as the ticket.");
+        }
 
         //Store old values for event publishing
         Status oldStatus = ticket.Status;
@@ -52,7 +65,7 @@ public class UpdateTicketHandler(TicketDbContext db, IEventPublisher publisher) 
         if (operatorChanged)
             ticket.AssignedOperatorId = request.TargetOperatorId;
 
-        //Log the ticket creation
+        //Log the ticket update
         TicketAuditLog ticketAuditLog = new TicketAuditLog
         {
             Id = Guid.NewGuid(),
@@ -77,7 +90,6 @@ public class UpdateTicketHandler(TicketDbContext db, IEventPublisher publisher) 
                 new TicketStatusChangedEvent(ticket.Id, ticket.Creator.OrganizationId, oldStatus, ticket.Status, request.UserId, user.Role),
             cancellationToken);
         }
-
         if (operatorChanged)
         {
             await _publisher.PublishAsync("TicketReassigned",

@@ -18,24 +18,20 @@ public class GetTicketHandler(TicketDbContext db) : IRequestHandler<GetTicketQue
             .AsNoTracking()
             .Include(t => t.Creator)
             .FirstOrDefaultAsync(t => t.Id == request.TicketId, cancellationToken);
-
         //Check if the ticket exists and return 404 Not Found if it doesn't
         if (ticket == null)
             throw new AppException(StatusCodes.Status404NotFound, $"Ticket {request.TicketId} could not be found.");
 
-        //Retrieve the user requesting the ticket
+        //Retrieve the user requesting the ticket and check if they exist, otherwise return 401 Unauthorized
         UserSnapshot? user = await _db.UserSnapshots
             .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
-
-        //Check if the user exists and return 401 Unauthorized if not
         if (user == null)
             throw new AppException(StatusCodes.Status401Unauthorized, "User could not be found.");
 
         //Enforce Data Visibility Rules
         bool isSystemAdmin = user.Role == Role.SUPPORT_HUB_ADMINISTRATOR || user.Role == Role.SYSTEM;
         bool isSameOrganization = user.OrganizationId == ticket.Creator.OrganizationId;
-
         if (!isSystemAdmin)
         {
             //Check if the user belongs to the same organization as the ticket creator. If not, return 403 Forbidden.

@@ -3,6 +3,10 @@ using SupportHub.TicketManagement.Domain.Enums;
 
 namespace SupportHub.TicketManagement.Domain.Entities
 {
+    /// <summary>
+    /// Represents a message or comment added to a support ticket, which can be created by either the ticket creator, an operator, or an automated system.
+    /// Each message is associated with a specific ticket and includes information about the sender and the content of the message.
+    /// </summary>
     public class TicketMessage
     {
         [Key]

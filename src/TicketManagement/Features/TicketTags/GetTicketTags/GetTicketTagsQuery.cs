@@ -1,14 +1,12 @@
-using FluentValidation;
 using MediatR;
 
 using SupportHub.TicketManagement.Domain.Entities;
-using SupportHub.TicketManagement.Domain.Enums;
 using SupportHub.TicketManagement.Infrastructure.Data;
 
 namespace SupportHub.TicketManagement.Features.TicketTags.GetTicketTags;
 
 /// <summary>
-/// Query to retrieve a filtered, sorted, and paginated list of tickets.
+/// Query to retrieve a filtered, sorted, and paginated list of ticket tags.
 /// </summary>
 public record GetTicketTagsQuery(
     Guid UserId,

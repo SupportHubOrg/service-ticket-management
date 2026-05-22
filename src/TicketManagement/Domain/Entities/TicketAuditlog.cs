@@ -3,6 +3,11 @@ using SupportHub.TicketManagement.Domain.Enums;
 
 namespace SupportHub.TicketManagement.Domain.Entities
 {
+    /// <summary>
+    /// Represents an audit log entry for changes made to a support ticket.
+    /// Contains information about the change, who made it, and when it occurred.
+    /// Used for tracking the history of actions taken on a ticket for accountability and troubleshooting purposes.
+    /// </summary>
     public class TicketAuditLog
     {
         [Key]

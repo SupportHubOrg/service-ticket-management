@@ -37,8 +37,5 @@ public class GetTicketValidator : AbstractValidator<GetTicketQuery>
     {
         RuleFor(x => x.TicketId)
             .NotEmpty().WithMessage("Ticket ID is required.");
-            
-        RuleFor(x => x.UserId)
-            .NotEmpty().WithMessage("User ID is required.");
     }
 }

@@ -13,12 +13,10 @@ public class GetTicketsHandler(TicketDbContext db) : IRequestHandler<GetTicketsQ
 
     public async Task<PagedResult<TicketSummaryResponse>> Handle(GetTicketsQuery request, CancellationToken cancellationToken)
     {
-        //Retrieve the requesting user to enforce authorization rules
+        //Retrieve the requesting user and check if they exist, otherwise return 401 Unauthorized
         var requestingUser = await _db.UserSnapshots
             .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
-
-        //Check if the user exists and return 401 Unauthorized if not
         if (requestingUser == null)
             throw new AppException(StatusCodes.Status401Unauthorized, "User could not be found.");
 
@@ -26,7 +24,8 @@ public class GetTicketsHandler(TicketDbContext db) : IRequestHandler<GetTicketsQ
         var query = _db.Tickets.AsNoTracking().AsQueryable();
 
         //Enforce Data Visibility Rules
-        if (requestingUser.Role != Role.SUPPORT_HUB_ADMINISTRATOR && requestingUser.Role != Role.SYSTEM)
+        bool isSystemAdmin = requestingUser.Role == Role.SUPPORT_HUB_ADMINISTRATOR || requestingUser.Role == Role.SYSTEM;
+        if (!isSystemAdmin)
         {
             //Lock all non-system admins to their own organization
             query = query.Where(t => t.Creator.OrganizationId == requestingUser.OrganizationId);
@@ -77,6 +76,7 @@ public class GetTicketsHandler(TicketDbContext db) : IRequestHandler<GetTicketsQ
             .Select(t => new TicketSummaryResponse(
                 t.Id,
                 t.Subject,
+                t.Description,
                 t.Status,
                 t.CreatorId,
                 t.AssignedOperatorId,

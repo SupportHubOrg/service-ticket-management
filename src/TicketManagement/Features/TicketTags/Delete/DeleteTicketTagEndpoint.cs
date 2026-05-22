@@ -10,7 +10,7 @@ public static class DeleteTicketTagEndpoint
     /// </summary>
     public static void MapDeleteTicketTagEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapDelete("/api/tickets/{ticketId}/tags/{TagId}", async (
+        app.MapDelete("/api/tickets/{ticketId}/tags/{tagId}", async (
             Guid ticketId,
             Guid tagId,
             HttpContext httpContext,

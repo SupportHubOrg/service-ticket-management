@@ -8,12 +8,21 @@ using Serilog;
 
 using SupportHub.TicketManagement.Infrastructure.Data;
 using SupportHub.TicketManagement.Infrastructure.Messaging;
+
 using SupportHub.TicketManagement.Features.Tickets.GetTickets;
 using SupportHub.TicketManagement.Features.Tickets.CreateTicket;
 using SupportHub.TicketManagement.Features.Tickets.GetTicket;
 using SupportHub.TicketManagement.Features.Tickets.DeleteTicket;
 using SupportHub.TicketManagement.Features.Tickets.UpdateTicket;
-using SupportHub.TicketManagement.Features.Tickets.Test;
+using SupportHub.TicketManagement.Features.TicketTags.CreateTicketTag;
+using SupportHub.TicketManagement.Features.TicketTags.DeleteTicketTag;
+using SupportHub.TicketManagement.Features.TicketTags.GetTicketTags;
+using SupportHub.TicketManagement.Features.Tickets.EvaluateAiResponse;
+using SupportHub.TicketManagement.Features.Tickets.ProposeArticle;
+using SupportHub.TicketManagement.Features.Tags.CreateTag;
+using SupportHub.TicketManagement.Features.Tags.GetTags;
+using SupportHub.TicketManagement.Features.Tags.GetTag;
+using SupportHub.TicketManagement.Features.Tags.DeleteTag;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -128,9 +137,20 @@ app.MapCreateTicketEndpoint();
 app.MapDeleteTicketEndpoint();
 app.MapGetTicketEndpoint();
 app.MapGetTicketsEndpoint();
+app.MapEvaluateAiResponseEndpoint();
+app.MapProposeArticleEndpoint();
 
-//Map the test endpoint to verify that the event bus is working end-to-end
-app.MapTestEndpoint();
+//Map the Ticket Tag API endpoints
+app.MapCreateTicketTagEndpoint();
+app.MapDeleteTicketTagEndpoint();
+app.MapGetTicketTagsEndpoint();
+
+//Map the Tag API endpoints
+app.MapCreateTagEndpoint();
+app.MapGetTagsEndpoint();
+app.MapGetTagEndpoint();
+app.MapDeleteTagEndpoint();
+app.MapUpdateTicketEndpoint();
 
 //Apply any pending database migrations on application startup to ensure the database schema is up to date with the application's data model
 using (var scope = app.Services.CreateScope())

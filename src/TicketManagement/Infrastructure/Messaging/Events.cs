@@ -24,7 +24,6 @@ public record UserInvitationAcceptedPayload(Guid OrganizationId, Guid UserId, st
 public record UserRoleUpdatedPayload(Guid OrganizationId, Guid UserId, Role OldRole, Role NewRole);
 public record OrganizationCreatedPayload(Guid OrganizationId, string OrganizationName, string Tier, Guid ManagerId);
 public record OrganizationSettingsUpdated(Guid OrganizationId, decimal SlaMaxFirstResponseMinutes, decimal SlaMaxHumanResponseMinutes, decimal SlaMaxResolutionMinutes, decimal AiTrustThreshold);
-public record OrganizationTagCreated(Guid OrganizationId, Guid TagId, string Name, string Description, bool ExcludedFromAi);
 
 //Incoming events consumed from Knowledge Management Service
 public record KnowledgeArticlePublishedPayload(Guid ArticleId, Guid DraftId, Guid SourceTicketId, Guid OrganizationId, string Title, string ArticleContent, List<string> Tags);

@@ -9,17 +9,10 @@ using SupportHub.TicketManagement.Infrastructure.Data;
 
 namespace SupportHub.TicketManagement.Features.Tickets.CreateTicket;
 
-/// <summary>
-/// Handles the creation of a new support ticket.
-/// </summary>
-/// <param name="db"></param>
-/// <param name="publisher"></param>
-/// <param name="logger"></param>
-public class CreateTicketHandler(TicketDbContext db, IEventPublisher publisher, ILogger<CreateTicketHandler> logger) : IRequestHandler<CreateTicketCommand, Guid>
+public class CreateTicketHandler(TicketDbContext db, IEventPublisher publisher) : IRequestHandler<CreateTicketCommand, Guid>
 {
     private readonly TicketDbContext _db = db;
     private readonly IEventPublisher _publisher = publisher;
-    private readonly ILogger<CreateTicketHandler> _logger = logger;
 
     public async Task<Guid> Handle(CreateTicketCommand request, CancellationToken cancellationToken)
     {

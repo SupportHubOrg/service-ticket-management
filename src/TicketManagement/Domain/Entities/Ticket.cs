@@ -3,6 +3,9 @@ using SupportHub.TicketManagement.Domain.Enums;
 
 namespace SupportHub.TicketManagement.Domain.Entities
 {
+    /// <summary>
+    /// Represents a support ticket created by a user. Contains information about the issue, its status, associated SLA deadlines, and relationships to users and tags.
+    /// </summary>
     public class Ticket
     {
         [Key]

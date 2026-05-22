@@ -20,7 +20,7 @@ public class DeleteTicketTagHandler(TicketDbContext db, IEventPublisher publishe
             .Include(t => t.Ticket)
             .FirstOrDefaultAsync(t => t.TicketId == request.TicketId && t.TagId == request.TagId, cancellationToken);
         if (ticketTag == null)
-            throw new AppException(StatusCodes.Status404NotFound, $"Ticket {request.TicketId} could not be found.");
+            throw new AppException(StatusCodes.Status404NotFound, $"Ticket Tag {request.TicketId} could not be found.");
 
         //Retrieve the user and check if they exist, return 401 Unauthorized if not
         UserSnapshot? user = await _db.UserSnapshots
@@ -47,7 +47,7 @@ public class DeleteTicketTagHandler(TicketDbContext db, IEventPublisher publishe
             ChangedById = request.UserId,
             ActorType = user.Role,
             Action = "Ticket Tag Removed",
-            OldValue = $"TagId: {request.TagId}, AssignedById: {request.UserId}",
+            OldValue = $"TagId: {request.TagId}, AssignedById: {ticketTag.AssignedById}",
             NewValue = null,
             Message = $"User {request.UserId} removed tag {request.TagId} from ticket {request.TicketId}.",
             CreatedAt = DateTime.UtcNow

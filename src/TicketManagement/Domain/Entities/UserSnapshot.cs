@@ -3,6 +3,10 @@ using SupportHub.TicketManagement.Domain.Enums;
 
 namespace SupportHub.TicketManagement.Domain.Entities
 {
+    /// <summary>
+    /// Represents a snapshot of a user at the time of ticket creation or modification.
+    /// The original table is stored in the organization access service, but a local copy is maintained to avoid cross-service calls during ticket operations.
+    /// </summary>
     public class UserSnapshot
     {
         [Key]

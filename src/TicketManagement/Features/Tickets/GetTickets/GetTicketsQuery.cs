@@ -23,11 +23,12 @@ public record GetTicketsQuery(
 ) : IRequest<PagedResult<TicketSummaryResponse>>;
 
 /// <summary>
-/// A lightweight representation of a Ticket used for list views and dashboards.
+/// Representation returned in a list of Tickets.
 /// </summary>
 public record TicketSummaryResponse(
     Guid Id,
     string Subject,
+    string Description,
     Status Status,
     Guid CreatorId,
     Guid? AssignedOperatorId,

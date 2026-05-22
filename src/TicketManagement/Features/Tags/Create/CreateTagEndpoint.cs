@@ -1,31 +1,36 @@
-using MediatR;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
-using System;
 using System.Security.Claims;
+using MediatR;
 
-namespace SupportHub.TicketManagement.Features.Tags.Create;
+namespace SupportHub.TicketManagement.Features.Tags.CreateTag;
 
 public static class CreateTagEndpoint
 {
+    /// <summary>
+    /// Maps the endpoint for creating a new Tag.
+    /// </summary>
+    /// <param name="app"></param>
     public static void MapCreateTagEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/organizations/{orgId}/tags", async (
-            Guid orgId,
-            CreateTagCommand command,
+        app.MapPost("/api/Tags", async (
+            CreateTagRequest request,
+            HttpContext httpContext,
             ClaimsPrincipal user,
             IMediator mediator) =>
         {
-            if (orgId != command.OrganizationId)
-                return Results.BadRequest("Organization ID mismatch.");
+            //Extract user ID from JWT claims
+            var userIdString = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userIdString, out Guid userId))
+                return Results.Unauthorized();
 
-            var result = await mediator.Send(command);
+            //Create and send the command
+            var command = new CreateTagCommand(userId, request.OrganizationId, request.Name, request.Description, request.ExcludedFromAi);
+            var TagId = await mediator.Send(command);
 
-            return Results.Created($"/api/organizations/{orgId}/tags/{result.Id}", result);
-        })
-        .WithName("CreateTag")
-        .WithTags("Tags")
-        .RequireAuthorization();
+            //Return 201 Created with the new resource route
+            return Results.Created($"/api/Tags/{TagId}", new CreateTagResult(TagId));
+        }).RequireAuthorization();
     }
 }
+
+public record CreateTagRequest(string Name, Guid OrganizationId, string Description, bool ExcludedFromAi);
+public record CreateTagResult(Guid TagId);

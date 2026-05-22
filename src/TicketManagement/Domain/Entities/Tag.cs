@@ -2,6 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SupportHub.TicketManagement.Domain.Entities
 {
+    /// <summary>
+    /// Represents a tag that can be associated with support tickets for categorization and filtering purposes.
+    /// </summary>
     public class Tag
     {
         [Key]
