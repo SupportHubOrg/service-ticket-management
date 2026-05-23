@@ -27,7 +27,10 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
             var config = new ProducerConfig
             {
                 BootstrapServers = settings.Value.BootstrapServers,
-                Acks = Acks.Leader
+                Acks = Acks.All, // Ensure all replicas acknowledge the message for durability
+                EnableIdempotence = true, // Enable idempotence to prevent duplicate messages
+                MessageSendMaxRetries = 5, //Limit the number of retries for failed messages
+                MaxInFlight = 5 //Limit the number of in-flight messages to maintain ordering guarantees when retries occur
             };
             
             //Create the Kafka producer instance

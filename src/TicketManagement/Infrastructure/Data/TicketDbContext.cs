@@ -4,8 +4,13 @@ using SupportHub.TicketManagement.Domain.Enums;
 
 namespace SupportHub.TicketManagement.Infrastructure.Data
 {
-    public class TicketDbContext(DbContextOptions<TicketDbContext> options) : DbContext(options)
+    public class TicketDbContext : DbContext
     {
+        public TicketDbContext(DbContextOptions<TicketDbContext> options) : base(options)
+        {
+            //Set a default command timeout for all database operations to prevent long-running queries from hanging indefinitely
+            Database.SetCommandTimeout(TimeSpan.FromSeconds(30));
+        }
 
         //Core Entities
         public DbSet<Ticket> Tickets => Set<Ticket>();

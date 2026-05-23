@@ -13,7 +13,10 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
         public string GroupId { get; set; } = string.Empty;
         
         //Topic to which events will be published, e.g. "ticket-management-events"
-        public string PublishTopic { get; set; } = "ticket-management-events"; 
+        public string PublishTopic { get; set; } = "ticket-management-events";
+        
+        //Topic for messages that failed to process successfully, e.g. "ticket-management-dlq"
+        public string DeadLetterQueueTopic { get; set; } = "ticket-management-dlq";
         
         //Comma-separated list of topics to subscribe to, e.g. "ticket-updates,ticket-creations"
         public string[] SubscribeTopics { get; set; } = [];

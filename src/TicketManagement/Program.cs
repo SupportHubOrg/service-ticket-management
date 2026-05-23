@@ -57,14 +57,15 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHealthChecks();
 
 //Add CORS policy
-//Change AllowAnyOrigin to get the specific origins in production for better security, TDOO
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("DefaultCorsPolicy", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
@@ -97,31 +98,60 @@ builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
 //Register the Background Kafka Consumer
 builder.Services.AddHostedService<TicketEventConsumerService>();
 
-//Get jwt information from saved settings
-var jwt = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()!;
+//Fetch authentication settings from configuration
+var authority = builder.Configuration["Authentication:Authority"]!;
+var audience = builder.Configuration["Authentication:Audience"]!;
+
+//Validate that required authentication settings are present
+if (string.IsNullOrWhiteSpace(authority))
+{
+    throw new InvalidOperationException(
+        "Authentication:Authority is not configured. " +
+        "Please set it in appsettings.json (e.g., 'https://keycloak.example.com/realms/support-hub')");
+}
+if (string.IsNullOrWhiteSpace(audience))
+{
+    throw new InvalidOperationException(
+        "Authentication:Audience is not configured. " +
+        "Please set it in appsettings.json (e.g., 'ticket-management-service')");
+}
+//Validate that Authority is a valid URL
+if (!Uri.TryCreate(authority, UriKind.Absolute, out var authorityUri) || authorityUri.Scheme != "https" && !builder.Environment.IsDevelopment())
+{
+    throw new InvalidOperationException(
+        $"Authentication:Authority must be a valid HTTPS URL. Received: '{authority}'. " +
+        "HTTP is only allowed in Development environment.");
+}
 
 //Add JWT authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        //Configure JWT token validation parameters
+        //Keycloak uses asymmetric RSA keys published at the JWKS endpoint
+        options.Authority = authority;
+        options.Audience = audience;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = jwt.Issuer,
-            ValidAudience = jwt.Audience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Secret)),
             ClockSkew = TimeSpan.Zero
         };
+        //Keycloak-specific configuration for development environments
+        if (builder.Environment.IsDevelopment())
+        {
+            options.RequireHttpsMetadata = false;
+        }
     });
 
 //Add authorization services to enable role-based or policy-based access control for API endpoints
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+//Add HTTP request logging middleware to log incoming requests and outgoing responses for better observability and debugging
+app.UseSerilogRequestLogging();
 
 //Register swagger when in development environment for API documentation and testing
 if (app.Environment.IsDevelopment())

@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using Confluent.Kafka;
 using MediatR;
@@ -11,14 +12,35 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
     /// Background service that consumes events from Kafka topics, deserializes them, and routes them to the appropriate MediatR commands for processing.
     /// Designed to run continuously as part of the application's hosted services.
     /// </summary>
-    public class TicketEventConsumerService(
-        IOptions<KafkaSettings> settings,
-        ILogger<TicketEventConsumerService> logger,
-        IServiceScopeFactory scopeFactory) : BackgroundService
+    public class TicketEventConsumerService : BackgroundService
     {
-        private readonly KafkaSettings _settings = settings.Value;
-        private readonly ILogger<TicketEventConsumerService> _logger = logger;
-        private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+        private readonly KafkaSettings _settings;
+        private readonly ILogger<TicketEventConsumerService> _logger;
+        private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IProducer<Null, string> _dlqProducer;
+
+        /// <summary>
+        /// Initializes a new instance of the TicketEventConsumerService with the given Kafka settings, logger, and service scope factory.
+        /// Also initializes a dedicated Kafka producer for sending messages to the Dead Letter Queue in case of processing failures.
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <param name="logger"></param>
+        /// <param name="scopeFactory"></param>
+        public TicketEventConsumerService(
+            IOptions<KafkaSettings> settings,
+            ILogger<TicketEventConsumerService> logger,
+            IServiceScopeFactory scopeFactory)
+        {
+            _settings = settings.Value;
+            _logger = logger;
+            _scopeFactory = scopeFactory;
+
+            _dlqProducer = new ProducerBuilder<Null, string>(new ProducerConfig 
+            { 
+                BootstrapServers = _settings.BootstrapServers,
+                Acks = Acks.All
+            }).Build();
+        }
 
         /// <summary>
         /// Continuously listens to the configured Kafka topics for new events.
@@ -52,15 +74,26 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
                         //Consume a message from Kafka -> this call will block until a message is available or the stopping token is triggered
                         var consumeResult = consumer.Consume(stoppingToken);
                         var messageJson = consumeResult.Message.Value;
+                        string eventType = "Unknown";
 
-                        //Parse the message JSON to extract the event type from the metadata for routing purposes
-                        using var document = JsonDocument.Parse(messageJson);
-                        var eventType = document.RootElement.GetProperty("metadata").GetProperty("eventType").GetString();
+                        try
+                        {
+                            //Parse the message JSON to extract the event type from the metadata for routing purposes
+                            using var document = JsonDocument.Parse(messageJson);
+                            eventType = document.RootElement.GetProperty("metadata").GetProperty("eventType").GetString() ?? "Unknown";
 
-                        _logger.LogInformation("Received event: {EventType}", eventType);
+                            _logger.LogInformation("Received event: {EventType}", eventType);
 
-                        //Process the message using MediatR
-                        await ProcessEventAsync(eventType, messageJson, stoppingToken);
+                            //Process the event
+                            await ProcessEventAsync(eventType, messageJson, stoppingToken);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Error processing event of type {EventType}. Routing to DLQ.", eventType);
+
+                            //If any exception occurs during processing, send the original message to the Dead Letter Queue for later analysis
+                            await RouteToDeadLetterQueueAsync(messageJson, ex, stoppingToken);
+                        }
 
                         //Commit the offset after successful processing to avoid re-processing on restart
                         consumer.Commit(consumeResult);
@@ -77,7 +110,12 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
             }
             finally
             {
+                //Once the stopping token is triggered, close the consumer to release resources and leave the consumer group gracefully
                 consumer.Close();
+
+                //Flush and dispose the DLQ producer to ensure all messages are sent before shutdown
+                _dlqProducer.Flush(TimeSpan.FromSeconds(5));
+                _dlqProducer.Dispose();
             }
         }
 
@@ -180,6 +218,29 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
             }
 
             await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Routes a failed message to the Dead Letter Queue by publishing it a specified DLQ Kafka topic.
+        /// </summary>
+        /// <param name="messageJson">The original message JSON that failed to process, which will be sent to the DLQ for later analysis.</param>
+        /// <param name="ex">The exception that was thrown during processing.</param>
+        /// <param name="cancellationToken">Cancellation token to cancel the publish operation if needed.</param>
+        /// <returns></returns>
+        private async Task RouteToDeadLetterQueueAsync(string messageJson, Exception ex, CancellationToken cancellationToken)
+        {
+            var deadLetterQueueMessage = new Message<Null, string>
+            {
+                Value = messageJson,
+                Headers = new Headers
+                {
+                    { "ExceptionMessage", Encoding.UTF8.GetBytes(ex.Message) },
+                    { "StackTrace", Encoding.UTF8.GetBytes(ex.StackTrace ?? string.Empty) },
+                    { "FailedAt", Encoding.UTF8.GetBytes(DateTime.UtcNow.ToString("O")) }
+                }
+            };
+
+            await _dlqProducer.ProduceAsync(_settings.DeadLetterQueueTopic, deadLetterQueueMessage, cancellationToken);
         }
     }
 }

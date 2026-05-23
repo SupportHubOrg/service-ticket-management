@@ -20,6 +20,9 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
     /// </summary>
     public class EventMetadata
     {
+        [JsonPropertyName("eventId")]
+        public Guid EventId { get; set; } = Guid.NewGuid();
+
         [JsonPropertyName("eventType")]
         public string EventType { get; set; } = string.Empty;
         
