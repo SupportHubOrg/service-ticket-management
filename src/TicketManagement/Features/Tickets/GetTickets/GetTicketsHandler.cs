@@ -21,7 +21,10 @@ public class GetTicketsHandler(TicketDbContext db) : IRequestHandler<GetTicketsQ
             throw new AppException(StatusCodes.Status401Unauthorized, "User could not be found.");
 
         //Initialize the base query
-        var query = _db.Tickets.AsNoTracking().AsQueryable();
+        var query = _db.Tickets
+            .Include(t => t.Creator)
+            .AsNoTracking()
+            .AsQueryable();
 
         //Enforce Data Visibility Rules
         bool isSystemAdmin = requestingUser.Role == Role.SUPPORT_HUB_ADMINISTRATOR || requestingUser.Role == Role.SYSTEM;

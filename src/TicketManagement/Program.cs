@@ -23,6 +23,17 @@ using SupportHub.TicketManagement.Features.Tags.CreateTag;
 using SupportHub.TicketManagement.Features.Tags.GetTags;
 using SupportHub.TicketManagement.Features.Tags.GetTag;
 using SupportHub.TicketManagement.Features.Tags.DeleteTag;
+using SupportHub.TicketManagement.Features.OperatorTags.GetOperatorTags;
+using SupportHub.TicketManagement.Features.OperatorTags.CreateOperatorTag;
+using SupportHub.TicketManagement.Features.OperatorTags.DeleteOperatorTag;
+using SupportHub.TicketManagement.Features.Tags.UpdateTag;
+using SupportHub.TicketManagement.Features.TicketAuditLogs.DeleteTicketAuditLog;
+using SupportHub.TicketManagement.Features.TicketAuditLogs.GetTicketAuditLogs;
+using SupportHub.TicketManagement.Features.TicketMessages.CreateTicketMessage;
+using SupportHub.TicketManagement.Features.TicketMessages.GetTicketMessages;
+using SupportHub.TicketManagement.Features.TicketMessages.GetTicketMessage;
+using SupportHub.TicketManagement.Features.TicketMessages.DeleteTicketMessage;
+using SupportHub.TicketManagement.Features.TicketMessages.UpdateTicketMessage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -150,7 +161,23 @@ app.MapCreateTagEndpoint();
 app.MapGetTagsEndpoint();
 app.MapGetTagEndpoint();
 app.MapDeleteTagEndpoint();
-app.MapUpdateTicketEndpoint();
+app.MapUpdateTagEndpoint();
+
+//Map the Operator Tag API endpoints
+app.MapCreateOperatorTagEndpoint();
+app.MapDeleteOperatorTagEndpoint();
+app.MapGetOperatorTagsEndpoint();
+
+//Map the Ticket Audit Log API endpoints
+app.MapGetTicketAuditLogsEndpoint();
+app.MapDeleteTicketAuditLogEndpoint();
+
+//Map the Ticket Message API endpoints
+app.MapCreateTicketMessageEndpoint();
+app.MapGetTicketMessageEndpoint();
+app.MapGetTicketMessagesEndpoint();
+app.MapDeleteTicketMessageEndpoint();
+app.MapUpdateTicketMessageEndpoint();
 
 //Apply any pending database migrations on application startup to ensure the database schema is up to date with the application's data model
 using (var scope = app.Services.CreateScope())

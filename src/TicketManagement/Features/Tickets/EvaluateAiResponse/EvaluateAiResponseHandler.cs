@@ -51,8 +51,7 @@ public class EvaluateAiResponseHandler(TicketDbContext db, IEventPublisher publi
                 request.EvaluatorId,
                 Status.UNASSIGNED
             );
-
-            await _publisher.PublishAsync("TicketEscalatedEvent", ticketEscalatedEvent, cancellationToken);
+            await _publisher.PublishAsync("TicketEscalated", ticketEscalatedEvent, cancellationToken);
         }
         //Otherwise, if the response was accepted, mark the ticket as CLOSED
         else
@@ -71,8 +70,7 @@ public class EvaluateAiResponseHandler(TicketDbContext db, IEventPublisher publi
                 request.EvaluatorId,
                 evaluatingUser.Role
             );
-
-            await _publisher.PublishAsync("TicketStatusChangedEvent", ticketStatusChangedEvent, cancellationToken);
+            await _publisher.PublishAsync("TicketStatusChanged", ticketStatusChangedEvent, cancellationToken);
         }
 
         return true;

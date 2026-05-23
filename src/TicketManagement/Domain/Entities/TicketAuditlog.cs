@@ -23,13 +23,13 @@ namespace SupportHub.TicketManagement.Domain.Entities
         public Role ActorType { get; set; } = default!;
 
         [Required]
-        [StringLength(255, ErrorMessage = "Action cannot be longer than 255 characters!")]
+        [StringLength(255, ErrorMessage = "Action cannot be longer than 200 characters!")]
         public string Action { get; set; } = default!;
 
-        [StringLength(255, ErrorMessage = "OldValue cannot be longer than 255 characters!")]
+        [StringLength(2000, ErrorMessage = "OldValue cannot be longer than 2000 characters!")]
         public string? OldValue { get; set; } = default!;
 
-        [StringLength(255, ErrorMessage = "NewValue cannot be longer than 255 characters!")]
+        [StringLength(2000, ErrorMessage = "NewValue cannot be longer than 2000 characters!")]
         public string? NewValue { get; set; } = default!;
 
         [Required]

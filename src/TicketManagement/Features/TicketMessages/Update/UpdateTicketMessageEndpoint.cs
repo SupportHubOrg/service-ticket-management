@@ -1,0 +1,38 @@
+using System.Security.Claims;
+using MediatR;
+
+using SupportHub.TicketManagement.Domain.Enums;
+
+namespace SupportHub.TicketManagement.Features.TicketMessages.UpdateTicketMessage;
+
+public static class UpdateTicketMessageEndpoint
+{
+    /// <summary>
+    /// Maps the endpoint for updating a ticket's status and assigned operator.
+    /// </summary>
+    /// <param name="app"></param>
+    public static void MapUpdateTicketMessageEndpoint(this IEndpointRouteBuilder app)
+    {
+        app.MapPut("/api/tickets/messages/{ticketMessageId}", async (
+            Guid ticketMessageId,
+            UpdateTicketMessageRequest request,
+            HttpContext httpContext,
+            ClaimsPrincipal user,
+            IMediator mediator ) =>
+        {
+            //Extract user ID from JWT claims
+            var userIdString = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userIdString, out Guid userId))
+                return Results.Unauthorized();
+
+            //Create and send the command to update the ticket
+            var command = new UpdateTicketMessageCommand(ticketMessageId, userId, request.Message);
+            await mediator.Send(command);
+
+            //Return success response
+            return Results.NoContent();
+        }).RequireAuthorization();
+    }
+}
+
+public record UpdateTicketMessageRequest(string Message);

@@ -15,7 +15,7 @@ namespace SupportHub.TicketManagement.Domain.Entities
         [Required]
         public Guid TicketId { get; set; } = default!;
         
-        public Guid? SenderId { get; set; }
+        public Guid SenderId { get; set; }
         
         [Required]
         public Role SenderType { get; set; } = default!;
@@ -25,7 +25,7 @@ namespace SupportHub.TicketManagement.Domain.Entities
         [MinLength(1, ErrorMessage = "Message must be at least 1 character long!")]
         public string Message { get; set; } = default!;
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime SentAt { get; set; } = DateTime.UtcNow;
 
 
         public Ticket Ticket { get; set; } = null!;

@@ -30,9 +30,8 @@ public class ProcessAiFailureHandler(TicketDbContext db, IEventPublisher publish
         //Save the changes to the database
         await _db.SaveChangesAsync(cancellationToken);
 
-        //Publish an event to notify that the ticket has been escalated
-        await _publisher.PublishAsync("TicketEscalated",
-            new TicketEscalatedEvent(ticket.Id, ticket.Creator.OrganizationId, ticket.AssignedOperatorId ?? Guid.Empty, ticket.Status),
-            cancellationToken);
+        //Publish the TicketEscalated event to Kafka
+        TicketEscalatedEvent ticketEscalatedEvent = new(ticket.Id, ticket.Creator.OrganizationId, ticket.AssignedOperatorId ?? Guid.Empty, ticket.Status);
+        await _publisher.PublishAsync("TicketEscalated", ticketEscalatedEvent, cancellationToken);
 }
 }

@@ -41,7 +41,7 @@ public class DeleteOperatorTagHandler(TicketDbContext db, IEventPublisher publis
 
         //Publish the tag update event to Kafka
         var operatorTagRemovedEvent = new OperatorTagRemovedEvent(operatorTag.OperatorId, operatorTag.TagId, request.UserId, operatorTag.Tag.Name); 
-        await _publisher.PublishAsync("OperatorTagRemovedEvent", operatorTagRemovedEvent, cancellationToken);
+        await _publisher.PublishAsync("OperatorTagRemoved", operatorTagRemovedEvent, cancellationToken);
 
         return true;
     }

@@ -85,7 +85,7 @@ public class CreateTicketTagHandler(TicketDbContext db, IEventPublisher publishe
 
         //Publish the tag update event to Kafka
         var ticketTagUpdatedEvent = new TicketTagUpdatedEvent(ticket.Id, ticket.Creator.OrganizationId, request.AssignedById, tagNames); 
-        await _publisher.PublishAsync("TicketTagUpdatedEvent", ticketTagUpdatedEvent, cancellationToken);
+        await _publisher.PublishAsync("TicketTagUpdated", ticketTagUpdatedEvent, cancellationToken);
 
         return true;
     }

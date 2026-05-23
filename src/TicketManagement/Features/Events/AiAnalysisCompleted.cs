@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
+using SupportHub.TicketManagement.Domain.Entities;
 using SupportHub.TicketManagement.Domain.Enums;
 using SupportHub.TicketManagement.Infrastructure.Data;
 using SupportHub.TicketManagement.Infrastructure.Messaging;
@@ -16,23 +17,19 @@ public class ProcessAiAnalysisCompletedHandler(TicketDbContext db, IEventPublish
 
     public async Task Handle(ProcessAiAnalysisCompletedCommand request, CancellationToken cancellationToken)
     {
-        //Fetch the ticket from the database
-        var ticket = await _db.Tickets
-            .Include(t => t.Creator)
-            .FirstOrDefaultAsync(t => t.Id == request.TicketId, cancellationToken);
-        if (ticket == null)
-            return;
+        //Retrieve the AI user snapshot to use as the sender of the AI message
+        UserSnapshot? aiUser = await _db.UserSnapshots.Where(u => u.Role == Role.AI)
+            .FirstOrDefaultAsync(cancellationToken);
 
-        //Update the ticket status to Unassigned and clear the assigned operator
-        ticket.Status = Status.UNASSIGNED;
-        ticket.AssignedOperatorId = null;
-
-        //Save the changes to the database
-        await _db.SaveChangesAsync(cancellationToken);
-
-        //Publish an event to notify that the ticket has been escalated
-        await _publisher.PublishAsync("TicketEscalated",
-            new TicketEscalatedEvent(ticket.Id, ticket.Creator.OrganizationId, ticket.AssignedOperatorId ?? Guid.Empty, ticket.Status),
-            cancellationToken);
-}
+        //Add a new message to the ticket with the AI analysis results
+        TicketMessage aiMessage = new()
+        {
+            Id = Guid.NewGuid(),
+            TicketId = request.TicketId,
+            SenderId = Guid.Empty,
+            SenderType = Role.AI,
+            Message = "AI analysis has been completed for this ticket. Please review the AI-generated insights and recommendations.",
+            SentAt = DateTime.UtcNow
+        };
+    }
 }

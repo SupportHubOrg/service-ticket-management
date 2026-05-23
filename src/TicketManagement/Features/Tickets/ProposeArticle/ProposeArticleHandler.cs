@@ -44,7 +44,7 @@ public class ProposeArticleHandler(TicketDbContext db, IEventPublisher publisher
         if (!isSystemAdmin && !isSameOrganization)
             throw new AppException(StatusCodes.Status403Forbidden, "Users can only propose knowledge base articles for tickets within their own organization.");
 
-        //Construct the Kafka Event Payload
+        //Publish the proposed article event to Kafka
         Guid operatorId = ticket.AssignedOperatorId ?? Guid.Empty;
         var proposedEvent = new KnowledgeArticleProposedEvent(
             ticket.Id,
@@ -53,8 +53,6 @@ public class ProposeArticleHandler(TicketDbContext db, IEventPublisher publisher
             request.ProposedSubject,
             request.Tags
         );
-
-        //Publish to Kafka
         await _publisher.PublishAsync("KnowledgeArticleProposed", proposedEvent, cancellationToken);
 
         return true;

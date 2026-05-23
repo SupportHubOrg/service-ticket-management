@@ -59,8 +59,8 @@ public class CreateOperatorTagHandler(TicketDbContext db, IEventPublisher publis
         await _db.SaveChangesAsync(cancellationToken);
 
         //Publish the tag added event to Kafka
-        var operatorTagAddedEvent = new OperatorTagAddedEvent(request.OperatorId, request.TagId, request.UserId, tag.Name); 
-        await _publisher.PublishAsync("OperatorTagAddedEvent", operatorTagAddedEvent, cancellationToken);
+        OperatorTagAddedEvent operatorTagAddedEvent = new(request.OperatorId, request.TagId, request.UserId, tag.Name); 
+        await _publisher.PublishAsync("OperatorTagAdded", operatorTagAddedEvent, cancellationToken);
 
         return true;
     }
