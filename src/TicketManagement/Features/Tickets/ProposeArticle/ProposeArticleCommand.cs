@@ -14,7 +14,7 @@ public record ProposeArticleCommand(
     Guid TicketId,
     Guid UserId,
     string ProposedSubject,
-    string[] Tags
+    Guid[] Tags
 ) : IRequest<bool>;
 
 public class ProposeArticleValidator : AbstractValidator<ProposeArticleCommand>

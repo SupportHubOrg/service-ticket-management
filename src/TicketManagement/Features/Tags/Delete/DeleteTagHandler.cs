@@ -37,6 +37,10 @@ public class DeleteTagHandler(TicketDbContext db, IEventPublisher publisher) : I
         _db.Tags.Remove(Tag);
         await _db.SaveChangesAsync(cancellationToken);
 
+        //Publish an event to notify other services that a Tag has been deleted
+        TagDeletedEvent tagDeletedEvent = new(Tag.Id, Tag.OrganizationId, request.UserId);
+        await _publisher.PublishAsync("TagDeleted", tagDeletedEvent, cancellationToken);
+
         return true;
     }
 }

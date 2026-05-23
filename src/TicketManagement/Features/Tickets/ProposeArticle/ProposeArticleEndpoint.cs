@@ -32,4 +32,4 @@ public static class ProposeArticleEndpoint
     }
 }
 
-public record ProposeArticleRequest(string ProposedSubject, string[] Tags);
+public record ProposeArticleRequest(string ProposedSubject, Guid[] Tags);

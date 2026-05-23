@@ -41,6 +41,10 @@ public class UpdateTagHandler(TicketDbContext db, IEventPublisher publisher) : I
         //Save changes to the database
         await _db.SaveChangesAsync(cancellationToken);
 
+        //Publish an event to notify other services of the Tag update
+        TagAISettingUpdatedEvent tagAISettingUpdatedEvent = new(Tag.Id, Tag.OrganizationId, request.UserId, Tag.ExcludedFromAi);
+        await _publisher.PublishAsync("TagAISettingUpdated", tagAISettingUpdatedEvent, cancellationToken);
+
         return true;
     }
 }

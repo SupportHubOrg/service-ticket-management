@@ -27,11 +27,18 @@ public class CreateTicketHandler(TicketDbContext db, IEventPublisher publisher) 
         //Get the current time to set CreatedAt and calculate SLA deadlines
         var now = DateTime.UtcNow;
 
+        //Get the AI user snapshot to use as the intial operator assignment for the ticket
+        UserSnapshot? aiUser = await _db.UserSnapshots.Where(u => u.Role == Role.AI)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (aiUser == null)
+            throw new AppException(StatusCodes.Status500InternalServerError, "No AI user found in the database for initial ticket assignment.");
+
         //Create the new ticket and calculate SLA deadlines based on the organization's rules
         var ticket = new Ticket
         {
             Id = Guid.NewGuid(),
             CreatorId = request.UserId,
+            AssignedOperatorId = aiUser.Id,
             Subject = request.Subject,
             Description = request.Description,
             Status = Status.NEW, 

@@ -100,22 +100,84 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
                 case "AiAnalysisFailed":
                     var aiFailEvent = JsonSerializer.Deserialize<EventEnvelope<AiAnalysisFailedPayload>>(rawJson);
                     if (aiFailEvent?.Payload != null)
-                        await mediator.Send(new ProcessAiFailureCommand(aiFailEvent.Payload.TicketId), stoppingToken);
+                        await mediator.Send(new ProcessAiFailureCommand(aiFailEvent.Payload), stoppingToken);
+                    else
+                        _logger.LogWarning("Received AiAnalysisFailed event with null payload. Raw message: {RawJson}", rawJson);
                     break;
 
                 case "KnowledgeArticleApproved":
                     var kbApprovedEvent = JsonSerializer.Deserialize<EventEnvelope<KnowledgeArticlePublishedPayload>>(rawJson);
                     if (kbApprovedEvent?.Payload != null)
-                        await mediator.Send(new SyncKnowledgeBaseArticleCommand(kbApprovedEvent.Payload.SourceTicketId, true), stoppingToken);
+                        await mediator.Send(new ProcessKnowledgeArticlePublishedCommand(kbApprovedEvent.Payload), stoppingToken);
+                    else
+                        _logger.LogWarning("Received KnowledgeArticleApproved event with null payload. Raw message: {RawJson}", rawJson);
                     break;
 
                 case "KnowledgeArticleRejected":
                     var kbRejectedEvent = JsonSerializer.Deserialize<EventEnvelope<KnowledgeArticleRejectedPayload>>(rawJson);
                     if (kbRejectedEvent?.Payload != null)
-                        await mediator.Send(new SyncKnowledgeBaseArticleCommand(kbRejectedEvent.Payload.SourceTicketId, false), stoppingToken);
+                        await mediator.Send(new ProcessKnowledgeArticleRejectedCommand(kbRejectedEvent.Payload), stoppingToken);
+                    else
+                        _logger.LogWarning("Received KnowledgeArticleRejected event with null payload. Raw message: {RawJson}", rawJson);
                     break;
-            }
+                
+                case "AiAnalysisCompleted":
+                    var aiCompletedEvent = JsonSerializer.Deserialize<EventEnvelope<AiAnalysisCompletedPayload>>(rawJson);
+                    if (aiCompletedEvent?.Payload != null)
+                        await mediator.Send(new ProcessAiAnalysisCompletedCommand(aiCompletedEvent.Payload), stoppingToken);
+                    else
+                        _logger.LogWarning("Received AiAnalysisCompleted event with null payload. Raw message: {RawJson}", rawJson);
+                    break;
+                
+                case "UserInvitationAccepted":
+                    var invitationAcceptedEvent = JsonSerializer.Deserialize<EventEnvelope<UserInvitationAcceptedPayload>>(rawJson);
+                    if (invitationAcceptedEvent?.Payload != null)
+                        await mediator.Send(new ProcessUserInvitationAcceptedCommand(invitationAcceptedEvent.Payload), stoppingToken);
+                    else
+                        _logger.LogWarning("Received UserInvitationAccepted event with null payload. Raw message: {RawJson}", rawJson);
+                    break;
 
+                case "UserRoleUpdated":
+                    var userRoleUpdatedEvent = JsonSerializer.Deserialize<EventEnvelope<UserRoleUpdatedPayload>>(rawJson);
+                    if (userRoleUpdatedEvent?.Payload != null)
+                        await mediator.Send(new ProcessUserRoleUpdatedCommand(userRoleUpdatedEvent.Payload), stoppingToken);
+                    else
+                        _logger.LogWarning("Received UserRoleUpdated event with null payload. Raw message: {RawJson}", rawJson);
+                    break;
+
+                case "UserRemovedFromOrganization":
+                    var userRemovedEvent = JsonSerializer.Deserialize<EventEnvelope<UserRemovedFromOrganizationPayload>>(rawJson);
+                    if (userRemovedEvent?.Payload != null)
+                        await mediator.Send(new ProcessUserRemovedFromOrganizationCommand(userRemovedEvent.Payload), stoppingToken);
+                    else
+                        _logger.LogWarning("Received UserRemovedFromOrganization event with null payload. Raw message: {RawJson}", rawJson);
+                    break;
+                
+                case "OrganizationCreated":
+                    var orgCreatedEvent = JsonSerializer.Deserialize<EventEnvelope<OrganizationCreatedPayload>>(rawJson);
+                    if (orgCreatedEvent?.Payload != null)
+                        await mediator.Send(new ProcessOrganizationCreatedCommand(orgCreatedEvent.Payload), stoppingToken);
+                    else
+                        _logger.LogWarning("Received OrganizationCreated event with null payload. Raw message: {RawJson}", rawJson);
+                    break;
+
+                case "OrganizationSettingsUpdated":
+                    var orgSettingsUpdatedEvent = JsonSerializer.Deserialize<EventEnvelope<OrganizationSettingsUpdatedPayload>>(rawJson);
+                    if (orgSettingsUpdatedEvent?.Payload != null)
+                        await mediator.Send(new ProcessOrganizationSettingsUpdatedCommand(orgSettingsUpdatedEvent.Payload), stoppingToken);
+                    else
+                        _logger.LogWarning("Received OrganizationSettingsUpdated event with null payload. Raw message: {RawJson}", rawJson);
+                    break;
+                
+                case "OrganizationDeleted":
+                    var orgDeletedEvent = JsonSerializer.Deserialize<EventEnvelope<OrganizationDeletedPayload>>(rawJson);
+                    if (orgDeletedEvent?.Payload != null)
+                        await mediator.Send(new ProcessOrganizationDeletedCommand(orgDeletedEvent.Payload), stoppingToken);
+                    else
+                        _logger.LogWarning("Received OrganizationDeleted event with null payload. Raw message: {RawJson}", rawJson);
+                    break;
+                
+            }
 
             await Task.CompletedTask;
         }

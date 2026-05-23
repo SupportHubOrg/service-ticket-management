@@ -58,6 +58,10 @@ public class CreateTagHandler(TicketDbContext db, IEventPublisher publisher) : I
         _db.Tags.Add(Tag);
         await _db.SaveChangesAsync(cancellationToken);
 
+        //Publish an event to notify that a new tag has been created
+        TagCreatedEvent tagCreatedEvent = new(Tag.Id, Tag.OrganizationId, Tag.Name);
+        await _publisher.PublishAsync("TagCreated", tagCreatedEvent, cancellationToken);
+
         //Return the assigned ID
         return Tag.Id;
     }

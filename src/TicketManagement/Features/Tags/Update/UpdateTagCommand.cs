@@ -21,5 +21,8 @@ public class UpdateTagValidator : AbstractValidator<UpdateTagCommand>
     {
         RuleFor(x => x.TagId)
             .NotEmpty().WithMessage("Tag ID is required.");
+
+        RuleFor(x => x.TargetExcludedFromAi)
+            .NotNull().WithMessage("At least one field must be provided for update.");
     }
 }

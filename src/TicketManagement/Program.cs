@@ -137,6 +137,10 @@ app.UseForwardedHeaders();
 //Apply the defined CORS policy to allow cross-origin requests from the frontend application and other clients
 app.UseCors("DefaultCorsPolicy");
 
+//Enable authentication and authorization middleware to protect API endpoints and ensure only authorized users can access them
+app.UseAuthentication();
+app.UseAuthorization();
+
 //Register health check endpoints
 app.MapHealthChecks("/health/live");
 app.MapHealthChecks("/health/ready");
