@@ -6,7 +6,7 @@ namespace SupportHub.TicketManagement.Features.TicketMessages.DeleteTicketMessag
 public static class DeleteTicketMessageEndpoint
 {
     /// <summary>
-    /// Maps the endpoint for deleting a ticket.
+    /// Maps the endpoint for deleting a ticket message.
     /// </summary>
     public static void MapDeleteTicketMessageEndpoint(this IEndpointRouteBuilder app)
     {
@@ -21,7 +21,7 @@ public static class DeleteTicketMessageEndpoint
             if (!Guid.TryParse(userIdString, out Guid userId))
                 return Results.Unauthorized();
 
-            //Create and send the command to delete the ticket
+            //Create and send the command to delete the ticket message
             var command = new DeleteTicketMessageCommand(ticketMessageId, userId);
             await mediator.Send(command);
 

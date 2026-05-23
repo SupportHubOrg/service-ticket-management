@@ -28,7 +28,7 @@ public static class CreateTicketMessageEndpoint
             var ticketMessageId = await mediator.Send(command);
 
             //Return 201 Created with the new resource route
-            return Results.Created($"/api/tickets/{ticketId}/messages/{ticketMessageId}", new CreateTicketMessageResult(ticketId));
+            return Results.Created($"/api/tickets/{ticketId}/messages/{ticketMessageId}", new CreateTicketMessageResult(ticketMessageId));
         }).RequireAuthorization();
     }
 }

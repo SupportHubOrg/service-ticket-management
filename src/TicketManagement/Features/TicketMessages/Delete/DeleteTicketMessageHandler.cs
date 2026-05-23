@@ -20,7 +20,7 @@ public class DeleteTicketMessageHandler(TicketDbContext db, IEventPublisher publ
             .Include(t => t.Sender)
             .FirstOrDefaultAsync(t => t.Id == request.TicketMessageId, cancellationToken);
         if (ticketMessage == null)
-            throw new AppException(StatusCodes.Status404NotFound, $"TicketMessage {request.TicketMessageId} could not be found.");
+            throw new AppException(StatusCodes.Status404NotFound, $"Ticket message {request.TicketMessageId} could not be found.");
 
         //Retrieve the user to verify permissions and check if they exist, otherwise return 401 Unauthorized
         UserSnapshot? user = await _db.UserSnapshots
@@ -33,7 +33,7 @@ public class DeleteTicketMessageHandler(TicketDbContext db, IEventPublisher publ
         bool isSystemAdmin = user.Role == Role.SUPPORT_HUB_ADMINISTRATOR || user.Role == Role.SYSTEM;
         bool isOrganizationManager = user.Role == Role.ORGANIZATION_MANAGER && user.OrganizationId == ticketMessage.Sender.OrganizationId;
         if (!isSystemAdmin && !isOrganizationManager && !isSender)
-            throw new AppException(StatusCodes.Status403Forbidden, $"User {request.UserId} attempted to delete ticket {request.TicketMessageId} without sufficient permissions. Only Organization Managers or SupportHub Administrators can delete tickets.");
+            throw new AppException(StatusCodes.Status403Forbidden, $"User {request.UserId} attempted to delete ticket message {request.TicketMessageId} without sufficient permissions. Only Organization Managers or SupportHub Administrators can delete tickets.");
 
         //Remove the ticket message from the database
         _db.TicketMessages.Remove(ticketMessage);

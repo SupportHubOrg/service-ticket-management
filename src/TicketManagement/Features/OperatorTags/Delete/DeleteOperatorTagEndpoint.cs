@@ -6,12 +6,12 @@ namespace SupportHub.TicketManagement.Features.OperatorTags.DeleteOperatorTag;
 public static class DeleteOperatorTagEndpoint
 {
     /// <summary>
-    /// Maps the endpoint for deleting a tag from a support ticket.
+    /// Maps the endpoint for deleting a tag from an operator.
     /// </summary>
     public static void MapDeleteOperatorTagEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapDelete("/api/operator-tags/tags/{tagId}", async (
-            Guid ticketId,
+        app.MapDelete("/api/tags/{tagId}/operators/{operatorId}", async (
+            Guid operatorId,
             Guid tagId,
             HttpContext httpContext,
             ClaimsPrincipal user,
@@ -23,7 +23,7 @@ public static class DeleteOperatorTagEndpoint
                 return Results.Unauthorized();
 
             //Create and send the command to delete the ticket tag
-            var command = new DeleteOperatorTagCommand(ticketId, tagId, userId);
+            var command = new DeleteOperatorTagCommand(operatorId, tagId, userId);
             await mediator.Send(command);
 
             //Return success response

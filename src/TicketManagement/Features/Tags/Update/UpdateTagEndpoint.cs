@@ -11,8 +11,8 @@ public static class UpdateTagEndpoint
     /// <param name="app"></param>
     public static void MapUpdateTagEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapPut("/api/Tags/{TagId}", async (
-            Guid TagId,
+        app.MapPut("/api/tags/{tagId}", async (
+            Guid tagId,
             UpdateTagRequest request,
             HttpContext httpContext,
             ClaimsPrincipal user,
@@ -24,7 +24,7 @@ public static class UpdateTagEndpoint
                 return Results.Unauthorized();
 
             //Create and send the command to update the Tag
-            var command = new UpdateTagCommand(TagId, userId, request.TargetExcludedFromAi);
+            var command = new UpdateTagCommand(tagId, userId, request.TargetExcludedFromAi);
             await mediator.Send(command);
 
             //Return success response

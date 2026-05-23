@@ -6,10 +6,10 @@ namespace SupportHub.TicketManagement.Features.TicketAuditLogs.DeleteTicketAudit
 /// <summary>
 /// Command to permanently delete a support ticket.
 /// </summary>
-/// <param name="TicketId">ID of the ticket to delete.</param>
+/// <param name="TicketAuditLogId">ID of the ticket audit log to be deleted.</param>
 /// <param name="UserId">ID of the user attempting to perform the deletion.</param>
 public record DeleteTicketAuditLogCommand(
-    Guid TicketId, 
+    Guid TicketAuditLogId, 
     Guid UserId
 ) : IRequest<bool>;
 
@@ -17,7 +17,7 @@ public class DeleteTicketAuditLogValidator : AbstractValidator<DeleteTicketAudit
 {
     public DeleteTicketAuditLogValidator()
     {
-        RuleFor(x => x.TicketId)
+        RuleFor(x => x.TicketAuditLogId)
             .NotEmpty().WithMessage("Ticket ID is required.");
     }
 }

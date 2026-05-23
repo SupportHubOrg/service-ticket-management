@@ -10,8 +10,8 @@ public static class GetTagEndpoint
     /// </summary>
     public static void MapGetTagEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/Tags/{TagId}", async (
-            Guid TagId,
+        app.MapGet("/api/tags/{tagId}", async (
+            Guid tagId,
             HttpContext httpContext,
             ClaimsPrincipal claimsPrincipal,
             IMediator mediator) =>
@@ -22,7 +22,7 @@ public static class GetTagEndpoint
                 return Results.Unauthorized();
 
             //Create and send the query
-            var query = new GetTagQuery(TagId, userId);
+            var query = new GetTagQuery(tagId, userId);
             var result = await mediator.Send(query);
 
             //Return 200 OK with the Tag details DTO

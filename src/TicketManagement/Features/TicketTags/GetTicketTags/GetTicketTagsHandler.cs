@@ -34,7 +34,7 @@ public class GetTicketTagsHandler(TicketDbContext db) : IRequestHandler<GetTicke
             switch (requestingUser.Role)
             {
                 case Role.EMPLOYEE:
-                    query = query.Where(tt => tt.Ticket.Creator.OrganizationId == requestingUser.Id);
+                    query = query.Where(tt => tt.Ticket.CreatorId == requestingUser.Id);
                     break;
                 case Role.LEVEL_1_OPERATOR:
                 case Role.LEVEL_2_OPERATOR:

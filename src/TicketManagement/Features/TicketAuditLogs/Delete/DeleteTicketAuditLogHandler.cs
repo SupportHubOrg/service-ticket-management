@@ -18,9 +18,9 @@ public class DeleteTicketAuditLogHandler(TicketDbContext db, IEventPublisher pub
         //Retrieve the ticket audit log to be deleted and check if it exists, otherwise return 404 Not Found
         TicketAuditLog? ticketAuditLog = await _db.TicketAuditLogs
             .Include(t => t.ChangedBy)
-            .FirstOrDefaultAsync(t => t.Id == request.TicketId, cancellationToken);
+            .FirstOrDefaultAsync(t => t.Id == request.TicketAuditLogId, cancellationToken);
         if (ticketAuditLog == null)
-            throw new AppException(StatusCodes.Status404NotFound, $"Ticket {request.TicketId} could not be found.");
+            throw new AppException(StatusCodes.Status404NotFound, $"Ticket audit log {request.TicketAuditLogId} could not be found.");
 
         //Retrieve the user to verify permissions and check if they exist, otherwise return 401 Unauthorized
         UserSnapshot? user = await _db.UserSnapshots
@@ -32,7 +32,7 @@ public class DeleteTicketAuditLogHandler(TicketDbContext db, IEventPublisher pub
         bool isSystemAdmin = user.Role == Role.SUPPORT_HUB_ADMINISTRATOR || user.Role == Role.SYSTEM;
         bool isOrganizationManager = user.Role == Role.ORGANIZATION_MANAGER && user.OrganizationId == ticketAuditLog.ChangedBy.OrganizationId;
         if (!isSystemAdmin && !isOrganizationManager)
-            throw new AppException(StatusCodes.Status403Forbidden, $"User {request.UserId} attempted to delete ticket audit log {request.TicketId} without sufficient permissions. Only Organization Managers or SupportHub Administrators can delete tickets.");
+            throw new AppException(StatusCodes.Status403Forbidden, $"User {request.UserId} attempted to delete ticket audit log {request.TicketAuditLogId} without sufficient permissions. Only Organization Managers or SupportHub Administrators can delete tickets.");
 
         //Remove the ticket audit log from the database
         _db.TicketAuditLogs.Remove(ticketAuditLog);

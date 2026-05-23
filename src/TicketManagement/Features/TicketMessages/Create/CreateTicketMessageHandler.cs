@@ -62,6 +62,6 @@ public class CreateTicketMessageHandler(TicketDbContext db, IEventPublisher publ
         await _publisher.PublishAsync("TicketMessageAdded", ticketMessageAddedEvent, cancellationToken);
 
         //Return the assigned ID
-        return ticket.Id;
+        return ticketMessage.Id;
     }
 }

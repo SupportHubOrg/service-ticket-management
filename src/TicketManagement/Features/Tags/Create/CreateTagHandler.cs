@@ -30,7 +30,7 @@ public class CreateTagHandler(TicketDbContext db, IEventPublisher publisher) : I
             throw new AppException(StatusCodes.Status401Unauthorized, "User could not be found.");
 
         //Check if the organization exists and return 404 Not Found if not
-        if (_db.OrganizationSnapshots.Any(os => os.Id != request.OrganizationId))
+        if (_db.OrganizationSnapshots.Any(os => os.Id == request.OrganizationId))
             throw new AppException(StatusCodes.Status404NotFound, "Organization could not be found.");
 
         //Check if the user has permissions to manage tags in the organization
@@ -53,6 +53,10 @@ public class CreateTagHandler(TicketDbContext db, IEventPublisher publisher) : I
             Description = request.Description,
             ExcludedFromAi = request.ExcludedFromAi
         };
+
+        //Save the new Tag to the database
+        _db.Tags.Add(Tag);
+        await _db.SaveChangesAsync(cancellationToken);
 
         //Return the assigned ID
         return Tag.Id;

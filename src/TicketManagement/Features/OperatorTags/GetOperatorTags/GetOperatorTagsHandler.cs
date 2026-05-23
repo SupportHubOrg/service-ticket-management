@@ -29,25 +29,7 @@ public class GetOperatorTagsHandler(TicketDbContext db) : IRequestHandler<GetOpe
         //Enforce Data Visibility Rules
         bool isSystemAdmin = requestingUser.Role == Role.SUPPORT_HUB_ADMINISTRATOR || requestingUser.Role == Role.SYSTEM;
         if (!isSystemAdmin)
-        {
-            //Lock all non-system admins to their own organization
             query = query.Where(tt => tt.Operator.OrganizationId == requestingUser.OrganizationId);
-
-            //Apply additional visibility rules based on the user's role within the organization
-            switch (requestingUser.Role)
-            {
-                case Role.EMPLOYEE:
-                    query = query.Where(tt => tt.Operator.OrganizationId == requestingUser.Id);
-                    break;
-                case Role.LEVEL_1_OPERATOR:
-                case Role.LEVEL_2_OPERATOR:
-                case Role.ORGANIZATION_MANAGER:
-                case Role.AI:
-                    break;
-                default:
-                    throw new AppException(StatusCodes.Status403Forbidden, "Unrecognized role attempting to query tickets.");
-            }
-        }
 
         //Apply User-Requested Filters
         if (request.TagId.HasValue)

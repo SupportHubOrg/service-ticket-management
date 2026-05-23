@@ -10,8 +10,8 @@ public static class DeleteTicketAuditLogEndpoint
     /// </summary>
     public static void MapDeleteTicketAuditLogEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapDelete("/api/ticket-audit-logs/{ticketId}", async (
-            Guid ticketId,
+        app.MapDelete("/api/ticket-audit-logs/{ticketAuditLogId}", async (
+            Guid ticketAuditLogId,
             HttpContext httpContext,
             ClaimsPrincipal user,
             IMediator mediator) =>
@@ -22,7 +22,7 @@ public static class DeleteTicketAuditLogEndpoint
                 return Results.Unauthorized();
 
             //Create and send the command to delete the ticket
-            var command = new DeleteTicketAuditLogCommand(ticketId, userId);
+            var command = new DeleteTicketAuditLogCommand(ticketAuditLogId, userId);
             await mediator.Send(command);
 
             //Return success response

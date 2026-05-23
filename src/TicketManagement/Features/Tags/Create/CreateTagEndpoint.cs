@@ -11,7 +11,7 @@ public static class CreateTagEndpoint
     /// <param name="app"></param>
     public static void MapCreateTagEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/Tags", async (
+        app.MapPost("/api/tags", async (
             CreateTagRequest request,
             HttpContext httpContext,
             ClaimsPrincipal user,
