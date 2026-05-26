@@ -24,10 +24,10 @@ public static class CreateTagEndpoint
 
             //Create and send the command
             var command = new CreateTagCommand(userId, request.OrganizationId, request.Name, request.Description, request.ExcludedFromAi);
-            var TagId = await mediator.Send(command);
+            var tagId = await mediator.Send(command);
 
             //Return 201 Created with the new resource route
-            return Results.Created($"/api/Tags/{TagId}", new CreateTagResult(TagId));
+            return Results.Created($"/api/tags/{tagId}", new CreateTagResult(tagId));
         }).RequireAuthorization();
     }
 }

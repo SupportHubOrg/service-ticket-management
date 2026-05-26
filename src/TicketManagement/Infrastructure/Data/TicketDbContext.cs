@@ -35,11 +35,6 @@ namespace SupportHub.TicketManagement.Infrastructure.Data
                 .HasConversion<string>();
 
             modelBuilder
-                .Entity<TicketTag>()
-                .Property(u => u.AssignedBy)
-                .HasConversion<string>();
-
-            modelBuilder
                 .Entity<Ticket>()
                 .Property(u => u.Status)
                 .HasConversion<string>();

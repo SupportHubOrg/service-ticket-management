@@ -10,7 +10,7 @@ using SupportHub.TicketManagement.Infrastructure.Data;
 namespace SupportHub.TicketManagement.Features.Tags.CreateTag;
 
 /// <summary>
-/// Handles the creation of a new support Tag.
+/// Handles the creation of a new tag.
 /// </summary>
 /// <param name="db"></param>
 /// <param name="publisher"></param>
@@ -27,22 +27,22 @@ public class CreateTagHandler(TicketDbContext db, IEventPublisher publisher) : I
             .Include(u => u.Organization)
             .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
         if (user == null)
-            throw new AppException(StatusCodes.Status401Unauthorized, "User could not be found.");
+            throw new AppException(StatusCodes.Status401Unauthorized, $"User {request.UserId} could not be found.");
 
         //Check if the organization exists and return 404 Not Found if not
         if (_db.OrganizationSnapshots.Any(os => os.Id == request.OrganizationId))
-            throw new AppException(StatusCodes.Status404NotFound, "Organization could not be found.");
+            throw new AppException(StatusCodes.Status404NotFound, $"Organization {request.OrganizationId} could not be found.");
 
         //Check if the user has permissions to manage tags in the organization
         bool isSystemAdmin = user.Role == Role.SUPPORT_HUB_ADMINISTRATOR || user.Role == Role.SYSTEM;
         bool isOrganizationManager = user.Role == Role.ORGANIZATION_MANAGER && user.OrganizationId == request.OrganizationId;
         if (!isSystemAdmin && !isOrganizationManager)
-            throw new AppException(StatusCodes.Status403Forbidden, "User does not have permissions to manage tags in the organization.");
+            throw new AppException(StatusCodes.Status403Forbidden, $"User does not have permissions to manage tags in the organization {request.OrganizationId}.");
 
         //Check if the name of the tag is unique within the organization
         bool nameExists = await _db.Tags.AnyAsync(t => t.OrganizationId == user.OrganizationId && t.Name == request.Name, cancellationToken);
         if (nameExists)
-            throw new AppException(StatusCodes.Status400BadRequest, "A tag with the same name already exists in the organization.");
+            throw new AppException(StatusCodes.Status400BadRequest, $"A tag with the same name already exists in the organization {request.OrganizationId}.");
 
         //Create the new Tag
         var Tag = new Tag

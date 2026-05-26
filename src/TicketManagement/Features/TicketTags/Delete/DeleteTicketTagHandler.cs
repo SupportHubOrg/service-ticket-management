@@ -57,13 +57,13 @@ public class DeleteTicketTagHandler(TicketDbContext db, IEventPublisher publishe
         await _db.SaveChangesAsync(cancellationToken);
 
         //Get the tag names into an array to include in the event payload
-        var tagNames = await _db.TicketTags
+        var currentTagIds = await _db.TicketTags
             .Where(tt => tt.TicketId == ticketTag.Ticket.Id)
-            .Join(_db.Tags, tt => tt.TagId, t => t.Id, (tt, t) => t.Name)
+            .Select(tt => tt.TagId)
             .ToArrayAsync(cancellationToken);
 
         //Publish the tag update event to Kafka
-        var ticketTagUpdatedEvent = new TicketTagUpdatedEvent(ticketTag.Ticket.Id, ticketTag.Ticket.Creator.OrganizationId, request.UserId, tagNames); 
+        var ticketTagUpdatedEvent = new TicketTagUpdatedEvent(ticketTag.Ticket.Id, ticketTag.Ticket.Creator.OrganizationId, request.UserId, currentTagIds); 
         await _publisher.PublishAsync("TicketTagUpdated", ticketTagUpdatedEvent, cancellationToken);
 
         return true;

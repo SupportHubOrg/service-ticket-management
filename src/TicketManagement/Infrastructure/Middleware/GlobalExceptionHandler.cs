@@ -40,7 +40,7 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
 
             problemDetails.Status = StatusCodes.Status500InternalServerError;
             problemDetails.Title = "Server Error";
-            problemDetails.Detail = "An unexpected error occurred while processing your request.";
+            problemDetails.Detail = "An unexpected error occurred while processing the request.";
         }
 
         //Set the response status code and write the problem details as JSON
