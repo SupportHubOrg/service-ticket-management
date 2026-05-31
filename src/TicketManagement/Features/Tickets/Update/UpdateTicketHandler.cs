@@ -63,10 +63,17 @@ public class UpdateTicketHandler(TicketDbContext db, IEventPublisher publisher) 
         //Apply updates to the ticket
         ticket.Status = request.TargetStatus;
         if (operatorChanged)
+        {
             ticket.AssignedOperatorId = request.TargetOperatorId;
+            
+            //Recalculate SLA deadlines
+            DateTime now = DateTime.UtcNow;
+            ticket.SlaHumanResponseDeadline = now.AddMinutes((double)ticket.Creator.Organization.SlaHumanResponseMinutes);
+            ticket.SlaResolutionDeadline = now.AddMinutes((double)ticket.Creator.Organization.SlaResolutionMinutes);
+        }
 
         //Log the ticket update
-        TicketAuditLog ticketAuditLog = new TicketAuditLog
+        TicketAuditLog ticketAuditLog = new()
         {
             Id = Guid.NewGuid(),
             TicketId = ticket.Id,
