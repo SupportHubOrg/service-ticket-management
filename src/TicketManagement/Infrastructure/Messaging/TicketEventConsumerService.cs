@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using Confluent.Kafka;
+using Confluent.Kafka.Admin;
 using MediatR;
 using Microsoft.Extensions.Options;
 
@@ -49,6 +50,9 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
         /// <returns>/returns>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            //Create topics before subscribing
+            await CreateTopicsAsync(stoppingToken);
+
             //Configure the Kafka consumer with the provided settings
             var config = new ConsumerConfig
             {
@@ -116,6 +120,48 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
                 //Flush and dispose the DLQ producer to ensure all messages are sent before shutdown
                 _dlqProducer.Flush(TimeSpan.FromSeconds(5));
                 _dlqProducer.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Creates the necessary Kafka topics if they do not already exist.
+        /// </summary>
+        /// <param name="stoppingToken"></param>
+        /// <returns></returns>
+        private async Task CreateTopicsAsync(CancellationToken stoppingToken)
+        {
+            try
+            {
+                //Use the Kafka AdminClient to check for existing topics and create any that are missing
+                using var adminClient = new AdminClientBuilder(
+                    new AdminClientConfig { BootstrapServers = _settings.BootstrapServers }
+                ).Build();
+
+                //Fetch the existing topics from the Kafka cluster
+                var topicsMetadata = adminClient.GetMetadata(TimeSpan.FromSeconds(10));
+                var existingTopics = topicsMetadata.Topics.Select(t => t.Topic).ToHashSet();
+
+                //Determine which topics from the configuration need to be created by comparing against existing topics
+                var topicsToCreate = _settings.SubscribeTopics
+                    .Where(topic => !existingTopics.Contains(topic))
+                    .Select(topic => new TopicSpecification 
+                    { 
+                        Name = topic, 
+                        NumPartitions = 1, 
+                        ReplicationFactor = 1 
+                    })
+                    .ToList();
+
+                //If there are any topics that need to be created, do so
+                if (topicsToCreate.Count > 0)
+                {
+                    await adminClient.CreateTopicsAsync(topicsToCreate);
+                    _logger.LogInformation("Created topics: {Topics}", string.Join(", ", topicsToCreate.Select(t => t.Name)));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Topic creation failed (topics may already exist)");
             }
         }
 
