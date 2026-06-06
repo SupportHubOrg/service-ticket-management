@@ -8,11 +8,11 @@ namespace SupportHub.TicketManagement.Features.Tags.UpdateTag;
 /// </summary>
 /// <param name="TagId">ID of the Tag to update.</param>
 /// <param name="UserId">ID of the user performing the update.</param>
-/// <param name="TargetExcludedFromAi">New value for whether the Tag should be excluded from AI processing.</param>
+/// <param name="ExcludedFromAi">New value for whether the Tag should be excluded from AI processing.</param>
 public record UpdateTagCommand(
     Guid UserId,
     Guid TagId,
-    bool? TargetExcludedFromAi
+    bool? ExcludedFromAi
 ) : IRequest<bool>;
 
 public class UpdateTagValidator : AbstractValidator<UpdateTagCommand>
@@ -22,7 +22,7 @@ public class UpdateTagValidator : AbstractValidator<UpdateTagCommand>
         RuleFor(x => x.TagId)
             .NotEmpty().WithMessage("Tag ID is required.");
 
-        RuleFor(x => x.TargetExcludedFromAi)
+        RuleFor(x => x.ExcludedFromAi)
             .NotNull().WithMessage("At least one field must be provided for update.");
     }
 }

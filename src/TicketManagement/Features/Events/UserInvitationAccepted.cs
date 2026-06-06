@@ -35,7 +35,7 @@ public class ProcessUserInvitationAcceptedHandler(
         {
             Id = payload.UserId,
             Role = payload.Role,
-            OrganizationId = payload.OrganizationId,
+            OrganizationId = payload.OrganizationId != Guid.Empty ? payload.OrganizationId : null,
         };
         _db.UserSnapshots.Add(userSnapshot);
         await _db.SaveChangesAsync(cancellationToken);

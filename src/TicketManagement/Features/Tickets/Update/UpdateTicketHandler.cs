@@ -20,6 +20,7 @@ public class UpdateTicketHandler(TicketDbContext db, IEventPublisher publisher) 
         Ticket? ticket = await _db.Tickets
             .Include(t => t.AssignedOperator)
             .Include(t => t.Creator)
+                .ThenInclude(o => o.Organization)
             .FirstOrDefaultAsync(t => t.Id == request.TicketId, cancellationToken);
         if (ticket == null)
             throw new AppException(StatusCodes.Status404NotFound, $"Ticket {request.TicketId} could not be found.");
@@ -38,14 +39,14 @@ public class UpdateTicketHandler(TicketDbContext db, IEventPublisher publisher) 
             throw new AppException(StatusCodes.Status403Forbidden, "User does not have permission to update this ticket.");
 
         //Determine what actually changed to conditionally publish events
-        bool statusChanged = ticket.Status != request.TargetStatus;
-        bool operatorChanged = request.TargetOperatorId.HasValue && ticket.AssignedOperatorId != request.TargetOperatorId;
+        bool statusChanged = ticket.Status != request.Status;
+        bool operatorChanged = request.OperatorId.HasValue && ticket.AssignedOperatorId != request.OperatorId;
 
         //If operator is being changed, verify the new operator exists, has the correct role and belongs to the correct organization, otherwise return 400 Bad Request
         if (operatorChanged)
         {
 #pragma warning disable CS8629 //Already checked that TargetOperatorId has value with the operatorChanged condition
-            var newOperator = await _db.UserSnapshots.Where(u => u.Id == request.TargetOperatorId.Value)
+            var newOperator = await _db.UserSnapshots.Where(u => u.Id == request.OperatorId.Value)
                 .FirstOrDefaultAsync(cancellationToken);
 #pragma warning restore CS8629
             if (newOperator == null)
@@ -61,10 +62,10 @@ public class UpdateTicketHandler(TicketDbContext db, IEventPublisher publisher) 
         Guid? oldOperatorId = ticket.AssignedOperatorId;
 
         //Apply updates to the ticket
-        ticket.Status = request.TargetStatus;
+        ticket.Status = request.Status;
         if (operatorChanged)
         {
-            ticket.AssignedOperatorId = request.TargetOperatorId;
+            ticket.AssignedOperatorId = request.OperatorId;
             
             //Recalculate SLA deadlines
             DateTime now = DateTime.UtcNow;
@@ -100,7 +101,7 @@ public class UpdateTicketHandler(TicketDbContext db, IEventPublisher publisher) 
         if (operatorChanged)
         {
             await _publisher.PublishAsync("TicketReassigned",
-                new TicketReasignedEvent(ticket.Id, ticket.Creator.OrganizationId, request.UserId, oldOperatorId, request.TargetOperatorId),
+                new TicketReasignedEvent(ticket.Id, ticket.Creator.OrganizationId, request.UserId, oldOperatorId, request.OperatorId),
                 cancellationToken);
         }
 

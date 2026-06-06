@@ -49,6 +49,7 @@ public class CreateTicketMessageHandler(TicketDbContext db, IEventPublisher publ
 
         //Save the ticket to the database
         _db.TicketMessages.Add(ticketMessage);
+        await _db.SaveChangesAsync(cancellationToken);
 
         //Publish the creation event to Kafka
         var ticketMessageAddedEvent = new TicketMessageAddedEvent(

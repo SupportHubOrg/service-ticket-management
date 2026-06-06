@@ -10,7 +10,7 @@ public static class DeleteTicketAuditLogEndpoint
     /// </summary>
     public static void MapDeleteTicketAuditLogEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapDelete("/api/ticket-audit-logs/{ticketAuditLogId}", async (
+        app.MapDelete("/api/tickets/logs/{ticketAuditLogId}", async (
             Guid ticketAuditLogId,
             HttpContext httpContext,
             ClaimsPrincipal user,

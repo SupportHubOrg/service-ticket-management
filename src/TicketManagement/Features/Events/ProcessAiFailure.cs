@@ -25,8 +25,6 @@ public class ProcessAiFailureHandler(
 
         //Fetch the ticket from the database
         var ticket = await _db.Tickets
-            .Include(t => t.Creator)
-                .ThenInclude(c => c.Organization)
             .FirstOrDefaultAsync(t => t.Id == payload.TicketId, cancellationToken);
         if (ticket == null)
         {
@@ -52,7 +50,7 @@ public class ProcessAiFailureHandler(
         {
             Id = Guid.NewGuid(),
             TicketId = ticket.Id,
-            ChangedById = ticket.CreatorId,
+            ChangedById = aiUser.Id,
             ActorType = Role.AI,
             Action = "AI Analysis Failed",
             OldValue = $"Status: {Status.NEW}",
@@ -80,7 +78,7 @@ public class ProcessAiFailureHandler(
         //Publish an event to notify that a new AI failure message has been added to the ticket
         TicketMessageAddedEvent aiMessageAddedEvent = new(
             payload.TicketId,
-            ticket.Creator.OrganizationId,
+            payload.OrganizationId,
             aiMessage.Id,
             aiMessage.SenderId,
             aiMessage.SenderType,
@@ -89,7 +87,7 @@ public class ProcessAiFailureHandler(
         await _publisher.PublishAsync("TicketMessageAdded", aiMessageAddedEvent, cancellationToken);
 
         //Publish the TicketEscalated event to Kafka
-        TicketEscalatedEvent ticketEscalatedEvent = new(ticket.Id, ticket.Creator.OrganizationId, ticket.AssignedOperatorId ?? Guid.Empty, ticket.Status);
+        TicketEscalatedEvent ticketEscalatedEvent = new(ticket.Id, payload.OrganizationId, ticket.AssignedOperatorId ?? Guid.Empty, ticket.Status);
         await _publisher.PublishAsync("TicketEscalated", ticketEscalatedEvent, cancellationToken);
-}
+    }
 }

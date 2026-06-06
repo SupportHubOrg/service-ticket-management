@@ -12,8 +12,7 @@ namespace SupportHub.TicketManagement.Domain.Entities
         [Key]
         public Guid Id { get; set; } = default!;
 
-        [Required]
-        public Guid OrganizationId { get; set; } = default!;
+        public Guid? OrganizationId { get; set; } = default!;
         
         [Required]
         [EnumDataType(typeof(Role))]

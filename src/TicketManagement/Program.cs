@@ -1,13 +1,13 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Prometheus;
 using Serilog;
 
 using SupportHub.TicketManagement.Infrastructure.Data;
 using SupportHub.TicketManagement.Infrastructure.Messaging;
+using SupportHub.TicketManagement.Infrastructure.Services;
 
 using SupportHub.TicketManagement.Features.Tickets.GetTickets;
 using SupportHub.TicketManagement.Features.Tickets.CreateTicket;
@@ -34,6 +34,8 @@ using SupportHub.TicketManagement.Features.TicketMessages.GetTicketMessages;
 using SupportHub.TicketManagement.Features.TicketMessages.GetTicketMessage;
 using SupportHub.TicketManagement.Features.TicketMessages.DeleteTicketMessage;
 using SupportHub.TicketManagement.Features.TicketMessages.UpdateTicketMessage;
+using SupportHub.TicketManagement.Infrastructure.Middleware;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -148,7 +150,30 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 //Add authorization services to enable role-based or policy-based access control for API endpoints
 builder.Services.AddAuthorization();
 
+//Add the sla monitoring service
+builder.Services.AddHostedService<SlaMonitoringBackgroundService>();
+
+//Add exception handling middleware
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
+//Configure the application to look for and honor proxy network signatures
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    
+    //Clear restrictions for containerized architectures where upstream proxy IPs change dynamically
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 var app = builder.Build();
+
+//Handle forwarded headers for reverse proxy scenarios
+app.UseForwardedHeaders();
+
+//Register exception handling middleware
+app.UseExceptionHandler(_ => {});
 
 //Add HTTP request logging middleware to log incoming requests and outgoing responses for better observability and debugging
 app.UseSerilogRequestLogging();
@@ -161,9 +186,11 @@ if (app.Environment.IsDevelopment())
 }
 
 //Redirect HTTP requests to HTTPS
-app.UseHttpsRedirection();
-//Handle forwarded headers for reverse proxy scenarios
-app.UseForwardedHeaders();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
 //Apply the defined CORS policy to allow cross-origin requests from the frontend application and other clients
 app.UseCors("DefaultCorsPolicy");
 
@@ -222,7 +249,7 @@ using (var scope = app.Services.CreateScope())
     try
     {
         logger.LogInformation("Applying database migrations...");
-        await dbContext.Database.MigrateAsync();
+        await dbContext.Database.EnsureCreatedAsync();
         logger.LogInformation("Database migrations applied successfully.");
     }
     catch (Exception ex)
@@ -235,7 +262,6 @@ using (var scope = app.Services.CreateScope())
 //Start the application
 try
 {
-    Log.Information("Starting Service Ticket Management API...");
     app.Run();
 }
 catch (Exception ex)

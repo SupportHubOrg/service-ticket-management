@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
 using MediatR;
@@ -166,6 +167,15 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
         }
 
         /// <summary>
+        /// Serializer options for JSON deserialization allowing for case-insensitive property matching.
+        /// </summary>
+        private static readonly JsonSerializerOptions _serializerOptions = new()
+        {
+            PropertyNameCaseInsensitive = true,
+            Converters = { new JsonStringEnumConverter(allowIntegerValues: true) }
+        };
+
+        /// <summary>
         /// Processes a consumed Kafka event by routing it to the appropriate MediatR command based on the event type.
         /// </summary>
         /// <param name="eventType"></param>
@@ -182,7 +192,7 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
             switch (eventType)
             {
                 case "AiAnalysisFailed":
-                    var aiFailEvent = JsonSerializer.Deserialize<EventEnvelope<AiAnalysisFailedPayload>>(rawJson);
+                    var aiFailEvent = JsonSerializer.Deserialize<EventEnvelope<AiAnalysisFailedPayload>>(rawJson, _serializerOptions);
                     if (aiFailEvent?.Payload != null)
                         await mediator.Send(new ProcessAiFailureCommand(aiFailEvent.Payload), stoppingToken);
                     else
@@ -190,7 +200,7 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
                     break;
 
                 case "KnowledgeArticleApproved":
-                    var kbApprovedEvent = JsonSerializer.Deserialize<EventEnvelope<KnowledgeArticlePublishedPayload>>(rawJson);
+                    var kbApprovedEvent = JsonSerializer.Deserialize<EventEnvelope<KnowledgeArticlePublishedPayload>>(rawJson, _serializerOptions);
                     if (kbApprovedEvent?.Payload != null)
                         await mediator.Send(new ProcessKnowledgeArticlePublishedCommand(kbApprovedEvent.Payload), stoppingToken);
                     else
@@ -198,7 +208,7 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
                     break;
 
                 case "KnowledgeArticleRejected":
-                    var kbRejectedEvent = JsonSerializer.Deserialize<EventEnvelope<KnowledgeArticleRejectedPayload>>(rawJson);
+                    var kbRejectedEvent = JsonSerializer.Deserialize<EventEnvelope<KnowledgeArticleRejectedPayload>>(rawJson, _serializerOptions);
                     if (kbRejectedEvent?.Payload != null)
                         await mediator.Send(new ProcessKnowledgeArticleRejectedCommand(kbRejectedEvent.Payload), stoppingToken);
                     else
@@ -206,7 +216,7 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
                     break;
                 
                 case "AiAnalysisCompleted":
-                    var aiCompletedEvent = JsonSerializer.Deserialize<EventEnvelope<AiAnalysisCompletedPayload>>(rawJson);
+                    var aiCompletedEvent = JsonSerializer.Deserialize<EventEnvelope<AiAnalysisCompletedPayload>>(rawJson, _serializerOptions);
                     if (aiCompletedEvent?.Payload != null)
                         await mediator.Send(new ProcessAiAnalysisCompletedCommand(aiCompletedEvent.Payload), stoppingToken);
                     else
@@ -214,7 +224,7 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
                     break;
                 
                 case "UserInvitationAccepted":
-                    var invitationAcceptedEvent = JsonSerializer.Deserialize<EventEnvelope<UserInvitationAcceptedPayload>>(rawJson);
+                    var invitationAcceptedEvent = JsonSerializer.Deserialize<EventEnvelope<UserInvitationAcceptedPayload>>(rawJson, _serializerOptions);
                     if (invitationAcceptedEvent?.Payload != null)
                         await mediator.Send(new ProcessUserInvitationAcceptedCommand(invitationAcceptedEvent.Payload), stoppingToken);
                     else
@@ -222,7 +232,7 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
                     break;
 
                 case "UserRoleUpdated":
-                    var userRoleUpdatedEvent = JsonSerializer.Deserialize<EventEnvelope<UserRoleUpdatedPayload>>(rawJson);
+                    var userRoleUpdatedEvent = JsonSerializer.Deserialize<EventEnvelope<UserRoleUpdatedPayload>>(rawJson, _serializerOptions);
                     if (userRoleUpdatedEvent?.Payload != null)
                         await mediator.Send(new ProcessUserRoleUpdatedCommand(userRoleUpdatedEvent.Payload), stoppingToken);
                     else
@@ -230,7 +240,7 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
                     break;
 
                 case "UserRemovedFromOrganization":
-                    var userRemovedEvent = JsonSerializer.Deserialize<EventEnvelope<UserRemovedFromOrganizationPayload>>(rawJson);
+                    var userRemovedEvent = JsonSerializer.Deserialize<EventEnvelope<UserRemovedFromOrganizationPayload>>(rawJson, _serializerOptions);
                     if (userRemovedEvent?.Payload != null)
                         await mediator.Send(new ProcessUserRemovedFromOrganizationCommand(userRemovedEvent.Payload), stoppingToken);
                     else
@@ -238,7 +248,7 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
                     break;
                 
                 case "OrganizationCreated":
-                    var orgCreatedEvent = JsonSerializer.Deserialize<EventEnvelope<OrganizationCreatedPayload>>(rawJson);
+                    var orgCreatedEvent = JsonSerializer.Deserialize<EventEnvelope<OrganizationCreatedPayload>>(rawJson, _serializerOptions);
                     if (orgCreatedEvent?.Payload != null)
                         await mediator.Send(new ProcessOrganizationCreatedCommand(orgCreatedEvent.Payload), stoppingToken);
                     else
@@ -246,7 +256,7 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
                     break;
 
                 case "OrganizationSettingsUpdated":
-                    var orgSettingsUpdatedEvent = JsonSerializer.Deserialize<EventEnvelope<OrganizationSettingsUpdatedPayload>>(rawJson);
+                    var orgSettingsUpdatedEvent = JsonSerializer.Deserialize<EventEnvelope<OrganizationSettingsUpdatedPayload>>(rawJson, _serializerOptions);
                     if (orgSettingsUpdatedEvent?.Payload != null)
                         await mediator.Send(new ProcessOrganizationSettingsUpdatedCommand(orgSettingsUpdatedEvent.Payload), stoppingToken);
                     else
@@ -254,7 +264,7 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
                     break;
                 
                 case "OrganizationDeleted":
-                    var orgDeletedEvent = JsonSerializer.Deserialize<EventEnvelope<OrganizationDeletedPayload>>(rawJson);
+                    var orgDeletedEvent = JsonSerializer.Deserialize<EventEnvelope<OrganizationDeletedPayload>>(rawJson, _serializerOptions);
                     if (orgDeletedEvent?.Payload != null)
                         await mediator.Send(new ProcessOrganizationDeletedCommand(orgDeletedEvent.Payload), stoppingToken);
                     else

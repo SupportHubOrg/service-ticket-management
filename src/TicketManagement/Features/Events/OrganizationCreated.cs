@@ -41,13 +41,7 @@ public class ProcessOrganizationCreatedHandler(
             AiTrustThreshold = 0.0m
         };
         _db.OrganizationSnapshots.Add(organizationSnapshot);
-
-        //Create an AI user snapshot for the organization
-        UserSnapshot aiUser = new()
-        {
-            Id = Guid.NewGuid(),
-        };
-        _db.UserSnapshots.Add(aiUser);
+        await _db.SaveChangesAsync(cancellationToken);
 
         //Create a user snapshot for the organization manager
         UserSnapshot managerUser = new()

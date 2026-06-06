@@ -35,8 +35,8 @@ public class UpdateTagHandler(TicketDbContext db, IEventPublisher publisher) : I
             throw new AppException(StatusCodes.Status403Forbidden, "User does not have permission to update this Tag.");
 
         //Apply updates to the Tag
-        if (request.TargetExcludedFromAi.HasValue)
-            Tag.ExcludedFromAi = request.TargetExcludedFromAi.Value;
+        if (request.ExcludedFromAi.HasValue)
+            Tag.ExcludedFromAi = request.ExcludedFromAi.Value;
 
         //Save changes to the database
         await _db.SaveChangesAsync(cancellationToken);

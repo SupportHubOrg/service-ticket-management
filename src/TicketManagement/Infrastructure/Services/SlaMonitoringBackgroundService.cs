@@ -1,18 +1,10 @@
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
-using SupportHub.TicketManagement.Domain.Entities;
 using SupportHub.TicketManagement.Domain.Enums;
 using SupportHub.TicketManagement.Infrastructure.Data;
 using SupportHub.TicketManagement.Infrastructure.Messaging;
 
-namespace SupportHub.TicketManagement.Infrastructure.BackgroundServices;
+namespace SupportHub.TicketManagement.Infrastructure.Services;
 
 /// <summary>
 /// A hosted background service that periodically checks for SLA breaches on open tickets.

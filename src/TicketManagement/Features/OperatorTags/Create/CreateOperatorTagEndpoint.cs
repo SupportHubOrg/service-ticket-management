@@ -11,7 +11,7 @@ public static class CreateOperatorTagEndpoint
     /// <param name="app"></param>
     public static void MapCreateOperatorTagEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/tags/{tagId}/operators", async (
+        app.MapPost("/api/tickets/tags/{tagId}/operators", async (
             Guid tagId,
             CreateOperatorTagRequest request,
             HttpContext httpContext,

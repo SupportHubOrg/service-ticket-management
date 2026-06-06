@@ -12,7 +12,7 @@ public static class GetTicketAuditLogsEndpoint
     /// </summary>
     public static void MapGetTicketAuditLogsEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/ticket-audit-logs", async (
+        app.MapGet("/api/tickets/logs", async (
             [AsParameters] GetTicketAuditLogsRequest parameters,
             HttpContext httpContext,
             ClaimsPrincipal claimsPrincipal,

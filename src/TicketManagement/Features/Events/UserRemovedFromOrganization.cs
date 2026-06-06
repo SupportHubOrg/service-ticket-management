@@ -36,7 +36,7 @@ public class ProcessUserRemovedFromOrganizationHandler(
 
         //Fetch the AI user snapshot to use as the new creator for orphaned tickets
         UserSnapshot? aiUser = await _db.UserSnapshots
-            .Where(u => u.Role == Role.AI && u.OrganizationId == payload.OrganizationId)
+            .Where(u => u.Role == Role.AI)
             .FirstOrDefaultAsync(cancellationToken);
         if (aiUser == null)
         {

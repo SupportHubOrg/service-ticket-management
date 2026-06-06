@@ -26,7 +26,7 @@ public static class UpdateTicketEndpoint
                 return Results.Unauthorized();
 
             //Create and send the command to update the ticket
-            var command = new UpdateTicketCommand(ticketId, userId, request.TargetStatus, request.TargetOperatorId);
+            var command = new UpdateTicketCommand(userId, ticketId, request.Status, request.OperatorId);
             await mediator.Send(command);
 
             //Return success response
@@ -35,4 +35,4 @@ public static class UpdateTicketEndpoint
     }
 }
 
-public record UpdateTicketRequest(Status TargetStatus, Guid? TargetOperatorId);
+public record UpdateTicketRequest(Status Status, Guid? OperatorId);

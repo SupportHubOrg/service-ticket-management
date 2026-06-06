@@ -10,7 +10,7 @@ public static class GetTagEndpoint
     /// </summary>
     public static void MapGetTagEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/tags/{tagId}", async (
+        app.MapGet("/api/tickets/tags/{tagId}", async (
             Guid tagId,
             HttpContext httpContext,
             ClaimsPrincipal claimsPrincipal,

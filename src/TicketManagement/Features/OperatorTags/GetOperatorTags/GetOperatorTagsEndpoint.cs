@@ -10,7 +10,7 @@ public static class GetOperatorTagsEndpoint
     /// </summary>
     public static void MapGetOperatorTagsEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/tags/operators", async (
+        app.MapGet("/api/tickets/tags/operators", async (
             [AsParameters] GetOperatorTagsRequest parameters,
             HttpContext httpContext,
             ClaimsPrincipal claimsPrincipal,
