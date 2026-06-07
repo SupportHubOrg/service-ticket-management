@@ -56,7 +56,7 @@ public class DeleteTicketHandler(TicketDbContext db, IEventPublisher publisher) 
 
         //Publish an event to notify other services of the deletion
         var ticketDeletedEvent = new TicketDeletedEvent(ticket.Id, ticket.Creator.OrganizationId, request.UserId, user.Role);
-        await _publisher.PublishAsync("TicketCreated", ticketDeletedEvent, cancellationToken);
+        await _publisher.PublishAsync("TicketDeleted", ticketDeletedEvent, cancellationToken);
 
         return true;
     }

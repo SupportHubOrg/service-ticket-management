@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "8o4CismJN2Q=",
+  "dgSpecHash": "EhMOhXXxXfY=",
   "success": true,
-  "projectFilePath": "c:\\dev\\SupportHubOrganization\\repos\\service-ticket-management\\src\\TicketManagement\\TicketManagement.csproj",
+  "projectFilePath": "C:\\dev\\SupportHubOrganization\\repos\\service-ticket-management\\src\\TicketManagement\\TicketManagement.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\scwi\\.nuget\\packages\\aspire.microsoft.entityframeworkcore.sqlserver\\13.3.0\\aspire.microsoft.entityframeworkcore.sqlserver.13.3.0.nupkg.sha512",
     "C:\\Users\\scwi\\.nuget\\packages\\azure.core\\1.53.0\\azure.core.1.53.0.nupkg.sha512",

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\dev\\SupportHubOrganization\\repos\\service-ticket-management\\src\\TicketManagement\\TicketManagement.csproj": {}
+    "C:\\dev\\SupportHubOrganization\\repos\\service-ticket-management\\src\\TicketManagement\\TicketManagement.csproj": {}
   },
   "projects": {
-    "c:\\dev\\SupportHubOrganization\\repos\\service-ticket-management\\src\\TicketManagement\\TicketManagement.csproj": {
+    "C:\\dev\\SupportHubOrganization\\repos\\service-ticket-management\\src\\TicketManagement\\TicketManagement.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\dev\\SupportHubOrganization\\repos\\service-ticket-management\\src\\TicketManagement\\TicketManagement.csproj",
+        "projectUniqueName": "C:\\dev\\SupportHubOrganization\\repos\\service-ticket-management\\src\\TicketManagement\\TicketManagement.csproj",
         "projectName": "TicketManagement",
-        "projectPath": "c:\\dev\\SupportHubOrganization\\repos\\service-ticket-management\\src\\TicketManagement\\TicketManagement.csproj",
+        "projectPath": "C:\\dev\\SupportHubOrganization\\repos\\service-ticket-management\\src\\TicketManagement\\TicketManagement.csproj",
         "packagesPath": "C:\\Users\\scwi\\.nuget\\packages\\",
-        "outputPath": "c:\\dev\\SupportHubOrganization\\repos\\service-ticket-management\\src\\TicketManagement\\obj\\",
+        "outputPath": "C:\\dev\\SupportHubOrganization\\repos\\service-ticket-management\\src\\TicketManagement\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
