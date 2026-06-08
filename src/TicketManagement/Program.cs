@@ -144,6 +144,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         if (builder.Environment.IsDevelopment())
         {
             options.RequireHttpsMetadata = false;
+            // Force the backend to fetch JWKS keys from the internal Docker network, 
+            // while still allowing the Authority (Issuer) to be the external localhost URL
+            options.MetadataAddress = "http://supporthub-keycloak:8080/realms/supporthub/.well-known/openid-configuration";
+            options.TokenValidationParameters.ValidIssuer = authority;
+            options.TokenValidationParameters.ValidAudiences = [audience, "account"];
         }
     });
 
