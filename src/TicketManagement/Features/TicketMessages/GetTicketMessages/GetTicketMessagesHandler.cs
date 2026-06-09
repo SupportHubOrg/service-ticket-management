@@ -32,7 +32,7 @@ public class GetTicketMessagesHandler(TicketDbContext db) : IRequestHandler<GetT
         if (!isSystemAdmin)
         {
             //Lock all non-system admins to their own organization
-            query = query.Where(t => t.Sender.OrganizationId == requestingUser.OrganizationId);
+            query = query.Where(t => t.Ticket.Creator.OrganizationId == requestingUser.OrganizationId);
 
             //Apply additional visibility rules based on the user's role within the organization
             switch (requestingUser.Role)

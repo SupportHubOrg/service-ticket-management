@@ -55,11 +55,12 @@ namespace SupportHub.TicketManagement.Infrastructure.Messaging
                 Payload = payload
             };
 
-            //Configure JSON serialization options to use camelCase naming
+            //Configure JSON serialization options to use camelCase naming and string enums
             var jsonOptions = new JsonSerializerOptions 
             { 
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase 
             };
+            jsonOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
 
             //Serialize the envelope to JSON
             var messageString = JsonSerializer.Serialize(envelope, jsonOptions);
