@@ -35,7 +35,12 @@ public class UpdateTicketHandler(TicketDbContext db, IEventPublisher publisher) 
         bool isSystemAdmin = user.Role == Role.SUPPORT_HUB_ADMINISTRATOR || user.Role == Role.SYSTEM;
         bool isOrganizationManager = user.Role == Role.ORGANIZATION_MANAGER && user.OrganizationId == ticket.Creator.OrganizationId;
         bool isAssignedOperator = ticket.AssignedOperatorId.HasValue && ticket.AssignedOperatorId.Value == request.UserId;
-        if (!isSystemAdmin && !isOrganizationManager && !isAssignedOperator)
+        bool isTakingOwnership = (ticket.Status == Status.NEW || ticket.Status == Status.UNASSIGNED) && 
+                                  request.OperatorId == request.UserId && 
+                                  (user.Role == Role.LEVEL_1_OPERATOR || user.Role == Role.LEVEL_2_OPERATOR) && 
+                                  user.OrganizationId == ticket.Creator.OrganizationId;
+
+        if (!isSystemAdmin && !isOrganizationManager && !isAssignedOperator && !isTakingOwnership)
             throw new AppException(StatusCodes.Status403Forbidden, "User does not have permission to update this ticket.");
 
         //Determine what actually changed to conditionally publish events
