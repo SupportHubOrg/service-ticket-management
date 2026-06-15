@@ -1413,3 +1413,5 @@ $RECYCLE.BIN/
 # Additional files built by Visual Studio
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,visualstudio,eclipse,dotenv,dotnetcore,aspnetcore,c++,python,java,react,reactnative,linux,windows,macos,powershell,node,csharp,remix+cloudflareworkers
+
+secret.yaml

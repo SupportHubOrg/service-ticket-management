@@ -1,25 +1,47 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: service-ticket-management
+  name: ticket-management
   labels:
-    app: service-ticket-management
+    app: ticket-management
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: service-ticket-management
+      app: ticket-management
   template:
     metadata:
       labels:
-        app: service-ticket-management
+        app: ticket-management
     spec:
+      initContainers:
+      - name: wait-for-keycloak
+        image: busybox:1.36
+        command: ['sh', '-c', 'until wget -q -O - http://keycloak.default.svc.cluster.local:9000/health/ready; do echo "Waiting for Keycloak..."; sleep 5; done;']
       containers:
-      - name: service-ticket-management
-        #Replace with actual container registry URL
-        image: your-registry.com/issueresolutionorg/service-ticket-management:latest
+      - name: ticket-management
+        image: your-registry.com/supporthub/ticket-management:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
         envFrom:
         - configMapRef:
-            name: service-ticket-management-config
+            name: ticket-management-config
+        - secretRef:
+            name: ticket-management-secret
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 10
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 10
