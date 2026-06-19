@@ -7,5 +7,5 @@ data:
   #Override Kafka BootstrapServers from localhost
   Kafka__BootstrapServers: "kafka-cluster-kafka-bootstrap:9092"
   #Authentication settings
-  Authentication__Authority: "http://keycloak.default.svc.cluster.local:8080/realms/supporthub"
+  Authentication__Authority: "http://keycloak.default.svc.cluster.local/realms/supporthub"
   Authentication__Audience: "ticket-management-service"

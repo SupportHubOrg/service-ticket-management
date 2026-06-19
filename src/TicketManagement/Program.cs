@@ -135,6 +135,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
+            ValidIssuer = "http://supporthub.local/realms/supporthub",
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
