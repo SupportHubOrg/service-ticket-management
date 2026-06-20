@@ -796,6 +796,22 @@
           "Microsoft.AspNetCore.App"
         ]
       },
+      "Serilog.Expressions/3.4.0": {
+        "type": "package",
+        "dependencies": {
+          "Serilog": "2.10.0"
+        },
+        "compile": {
+          "lib/net5.0/Serilog.Expressions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net5.0/Serilog.Expressions.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Serilog.Extensions.Hosting/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -2261,6 +2277,24 @@
         "serilog.aspnetcore.nuspec"
       ]
     },
+    "Serilog.Expressions/3.4.0": {
+      "sha512": "X+7Aem+UH8f9GPOl5lJMC1IjlGvdZRFE2ZQ4/amKJlZ0wEciInZAtOwv5eDqPHdkUvYlB22UXi7YowJB8rLCVQ==",
+      "type": "package",
+      "path": "serilog.expressions/3.4.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "icon.png",
+        "lib/net5.0/Serilog.Expressions.dll",
+        "lib/net5.0/Serilog.Expressions.xml",
+        "lib/netstandard2.0/Serilog.Expressions.dll",
+        "lib/netstandard2.0/Serilog.Expressions.xml",
+        "lib/netstandard2.1/Serilog.Expressions.dll",
+        "lib/netstandard2.1/Serilog.Expressions.xml",
+        "serilog.expressions.3.4.0.nupkg.sha512",
+        "serilog.expressions.nuspec"
+      ]
+    },
     "Serilog.Extensions.Hosting/10.0.0": {
       "sha512": "E7juuIc+gzoGxgzFooFgAV8g9BfiSXNKsUok9NmEpyAXg2odkcPsMa/Yo4axkJRlh0se7mkYQ1GXDaBemR+b6w==",
       "type": "package",
@@ -2694,6 +2728,7 @@
       "Microsoft.AspNetCore.OpenApi >= 10.0.4",
       "Microsoft.EntityFrameworkCore.SqlServer >= 10.0.7",
       "Serilog.AspNetCore >= 10.0.0",
+      "Serilog.Expressions >= 3.4.0",
       "Swashbuckle.AspNetCore >= 10.1.7",
       "prometheus-net.AspNetCore >= 8.2.1"
     ]
@@ -2780,6 +2815,10 @@
           "Serilog.AspNetCore": {
             "target": "Package",
             "version": "[10.0.0, )"
+          },
+          "Serilog.Expressions": {
+            "target": "Package",
+            "version": "[3.4.0, )"
           },
           "Swashbuckle.AspNetCore": {
             "target": "Package",

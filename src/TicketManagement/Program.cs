@@ -41,7 +41,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 //Add a Serilog logger with console output and configuration from appsettings.json
 builder.Host.UseSerilog((ctx, config) =>
-    config.ReadFrom.Configuration(ctx.Configuration));
+{
+    config.ReadFrom.Configuration(ctx.Configuration)
+          .Filter.ByExcluding("RequestPath like '%/health%'");
+});
 
 //Allow enums to be serialized as strings in JSON responses for better readability in API responses and documentation
 builder.Services.ConfigureHttpJsonOptions(options =>
@@ -177,7 +180,24 @@ app.UseForwardedHeaders();
 app.UseExceptionHandler(_ => {});
 
 //Add HTTP request logging middleware to log incoming requests and outgoing responses for better observability and debugging
-app.UseSerilogRequestLogging();
+app.UseSerilogRequestLogging(options =>
+{
+    options.GetLevel = (httpContext, elapsed, ex) =>
+    {
+        //If an exception happens log them at Error level
+        if (ex != null) return Serilog.Events.LogEventLevel.Error;
+        if (httpContext.Response.StatusCode >= 500) return Serilog.Events.LogEventLevel.Error;
+
+        //Mute periodic Kubernetes health probes by demoting them to verbose
+        var path = httpContext.Request.Path.Value;
+        if (path != null && path.StartsWith("/health", StringComparison.OrdinalIgnoreCase))
+        {
+            return Serilog.Events.LogEventLevel.Verbose;
+        }
+
+        return Serilog.Events.LogEventLevel.Information;
+    };
+});
 
 //Register swagger when in development environment for API documentation and testing
 if (app.Environment.IsDevelopment())
