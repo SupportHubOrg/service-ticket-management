@@ -138,7 +138,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = "http://supporthub.local/realms/supporthub",
+            ValidIssuer = "https://dingbat-brussels-dimmer.ngrok-free.dev/realms/supporthub",
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
